@@ -33,3 +33,17 @@ Java + Oracle のシステムを対象にした「確率つき影響調査ツー
 ## よく使うコマンド
 
 （Phase 0 でプロジェクトを作ったら追記する）
+
+## Agent skills
+
+### Issue tracker
+
+課題は GitHub Issues（AkiraIsozaki/hamon）で管理する。`gh` CLI を使う。See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+既定の 5 ラベル（needs-triage / needs-info / ready-for-agent / ready-for-human / wontfix）をそのまま使う。See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+単一コンテキスト：ルートの `GLOSSARY.md` と `docs/adr/`。See `docs/agents/domain.md`.
