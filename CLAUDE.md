@@ -35,7 +35,8 @@ Java + Oracle のシステムを対象にした「確率つき影響調査ツー
 
 バックエンド（リポジトリ直下）
 - `./gradlew bootRun` … 起動（http://localhost:8080）
-- `./gradlew test` … テスト（`openapi.yaml` からのコード生成も走る。生成先は `build/generated/openapi`）
+- `./gradlew test` … テスト（`openapi.yaml` からのコード生成も走る。生成先は `build/generated/openapi`。統合テストは Oracle が起きている必要がある）
+- DB の変更は `src/main/resources/db/migration/V{n}__{説明}.sql` を足す（Flyway が起動時に適用。適用済みの V ファイルは編集しない）
 - `curl 'localhost:8080/api/impact?target=com.example.order.OrderService%23cancel'` … API の疎通確認
 - `curl localhost:8080/actuator/health` … DB を含むヘルス（`components.db.status` が `UP` なら Oracle に繋がっている）
 

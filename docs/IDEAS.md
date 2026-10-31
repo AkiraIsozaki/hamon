@@ -129,7 +129,7 @@ flowchart LR
 | ビルド | Gradle（Wrapper、Groovy DSL） | 開発者の好みで決定（2026-10-31）。`./gradlew` を使う |
 | API | OpenAPI スキーマファースト | ルートの `openapi.yaml` が契約。サーバーは openapi-generator（Gradle プラグイン、`spring` 生成器）でインターフェースを生成、フロントは openapi-typescript で型を生成し openapi-fetch で呼ぶ |
 | DB | Oracle AI Database 26ai Free | Dev Container 内のコンテナ |
-| データアクセス | 未決 | MyBatis / Spring Data JDBC / JdbcClient |
+| データアクセス | MyBatis（まず）→ Spring Data JDBC（比較） | ADR-0001。マイグレーションは Flyway |
 | フロント | React + Vite + TypeScript | `frontend/`。グラフ描画は Cytoscape.js。TypeScript は openapi-typescript の都合で 5 系に固定 |
 | 解析 | JavaParser など | MyBatis XML は XML として、SQL は SQL パーサで |
 | Jev | REST API 直叩き | `TYPESAFE_API_KEY` はリポジトリ直下の `.env`（git 管理外）からコンテナの環境変数として渡す |
@@ -232,13 +232,14 @@ components:
 - [x] Dev Container 定義（Java 25 + Node + Oracle 26ai Free、Jev のキーは .env から）
 - [x] Phase 0：Spring Initializr でプロジェクト作成（Boot 4.1.2 / Java 25 / Gradle）、`/hello` と `/actuator/health` で Oracle 接続確認（2026-10-31）
 - [x] Phase 1：`openapi.yaml` → 生成 → `GET /api/impact`（固定のダミー候補）、React + Cytoscape でグラフ表示（2026-10-31）
-- [ ] Phase 2：Oracle にノード・辺を保存し、再帰 SQL で逆向きに辿る（データアクセス方式の決定が先）
+- [x] Phase 2：Flyway で node / edge 表とサンプルグラフ、MyBatis + 再帰 SQL（WITH … CYCLE）で逆向きに辿る（2026-10-31、ADR-0001）
+- [ ] Phase 2b：同じ API を Spring Data JDBC で実装し直して MyBatis と比較する
+- [ ] Phase 3：このリポジトリ自身を解析してグラフにする
 
 ---
 
 ## 未決事項
 
-- **データアクセス方式**：MyBatis（SI でなじみ、Phase 4 の解析対象にもなる）／Spring Data JDBC（Spring 標準寄り）／JdbcClient（薄い）
 - **グラフの保存方式**：
   - Oracle の表 + 再帰 SQL（`WITH` 再帰 / `CONNECT BY`）… まずはこれ
   - Oracle の SQL Property Graph（23ai 以降の `GRAPH_TABLE`）… DB を増やさずにグラフクエリ。要検証

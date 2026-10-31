@@ -8,3 +8,10 @@ management:
     health:
       # /actuator/health に db などコンポーネントごとの状態を出す（Oracle 接続確認に使う）
       show-details: always
+
+mybatis:
+  configuration:
+    # SELECT の列名 node_path を Java の nodePath に対応させる
+    map-underscore-to-camel-case: true
+    # 結果行を record のコンストラクタ引数名で組み立てる（引数名は Boot の Gradle プラグインが -parameters で残す）
+    arg-name-based-constructor-auto-mapping: true

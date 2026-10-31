@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.akiraisozaki.hamon.impact.ImpactMapper">
+
+  <!--
+    変更点（target）に依存しているノードを再帰的に集める。
+    - probability は経路上の辺の確率の積。閾値未満になった経路はそこで打ち切る
+    - node_path は経路上のノード名を改行で連結したもの（ImpactRow.PATH_SEPARATOR と揃える）
+    - CYCLE 句で循環を検出し、同じノードを 2 度通らない
+    shortcut: node_path は VARCHAR2 の 4000 文字まで, 深い経路や長い名前で切れたら経路を別表に出す
+  -->
+  <select id="traceUpstream" resultType="io.github.akiraisozaki.hamon.impact.ImpactRow">
+    WITH ripple (node_id, probability, node_path) AS (
+        SELECT e.dependent_id,
+               e.probability,
+               changed.name || CHR(10) || dependent.name
+          FROM node changed
+          JOIN edge e         ON e.dependency_id = changed.id
+          JOIN node dependent ON dependent.id = e.dependent_id
+         WHERE changed.name = #{target}
+           AND e.probability &gt;= #{minProbability}
+        UNION ALL
+        SELECT e.dependent_id,
+               r.probability * e.probability,
+               r.node_path || CHR(10) || dependent.name
+          FROM ripple r
+          JOIN edge e         ON e.dependency_id = r.node_id
+          JOIN node dependent ON dependent.id = e.dependent_id
+         WHERE r.probability * e.probability &gt;= #{minProbability}
+    )
+    CYCLE node_id SET is_cycle TO 'Y' DEFAULT 'N'
+    SELECT n.name AS node, best.probability, best.node_path
+      FROM (SELECT r.*,
+                   ROW_NUMBER() OVER (PARTITION BY r.node_id ORDER BY r.probability DESC) AS path_rank
+              FROM ripple r
+             WHERE r.is_cycle = 'N') best
+      JOIN node n ON n.id = best.node_id
+     WHERE best.path_rank = 1
+     ORDER BY best.probability DESC, n.name
+  </select>
+
+</mapper>

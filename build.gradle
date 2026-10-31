@@ -23,6 +23,11 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	// データアクセスは MyBatis（ADR-0001）。Spring Boot 4.1 系に対応した 4.1.x を使う
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.1.0'
+	// DB マイグレーション。src/main/resources/db/migration の V__*.sql を起動時に適用する
+	implementation 'org.springframework.boot:spring-boot-starter-flyway'
+	runtimeOnly 'org.flywaydb:flyway-database-oracle'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	// 生成コードの @Valid / @Min などを実際に検証させる
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
