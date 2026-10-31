@@ -10,15 +10,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import io.github.akiraisozaki.hamon.api.model.ImpactItem;
 import tools.jackson.databind.json.JsonMapper;
 
-/** V2__sample_graph.sql のグラフを前提にした、API から Oracle まで通す統合テスト */
+/** sample-graph.sql のグラフを前提にした、API から Oracle まで通す統合テスト。データはテストごとに入れて巻き戻す */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
+@Sql("/sample-graph.sql")
 class ImpactApiTest {
 
 	private static final String ORDER_SERVICE_CANCEL = "com.example.order.OrderService#cancel";

@@ -19,3 +19,9 @@ mybatis:
     map-underscore-to-camel-case: true
     # 結果行を record のコンストラクタ引数名で組み立てる（引数名は Boot の Gradle プラグインが -parameters で残す）
     arg-name-based-constructor-auto-mapping: true
+
+hamon:
+  analysis:
+    # 解析する Java ソースのルート（作業ディレクトリからの相対パス）。まずはこのリポジトリ自身
+    source-roots:
+      - src/main/java

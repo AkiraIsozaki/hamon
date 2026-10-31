@@ -2,6 +2,8 @@ package io.github.akiraisozaki.hamon.impact;
 
 import java.util.List;
 
+import io.github.akiraisozaki.hamon.graph.Node;
+
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.Repository;
 

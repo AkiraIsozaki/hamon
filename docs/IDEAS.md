@@ -131,7 +131,7 @@ flowchart LR
 | DB | Oracle AI Database 26ai Free | Dev Container 内のコンテナ |
 | データアクセス | MyBatis（まず）→ Spring Data JDBC（比較） | ADR-0001。マイグレーションは Flyway |
 | フロント | React + Vite + TypeScript | `frontend/`。グラフ描画は Cytoscape.js。TypeScript は openapi-typescript の都合で 5 系に固定 |
-| 解析 | JavaParser など | MyBatis XML は XML として、SQL は SQL パーサで |
+| 解析 | JavaParser + symbol solver（ADR-0002） | MyBatis XML は XML として、SQL は SQL パーサで（Phase 4） |
 | Jev | REST API 直叩き | `TYPESAFE_API_KEY` はリポジトリ直下の `.env`（git 管理外）からコンテナの環境変数として渡す |
 | 開発環境 | Linux Mint + Docker Engine + VS Code + Dev Container + Claude Code | `.devcontainer/` 参照 |
 
@@ -235,7 +235,8 @@ components:
 - [x] Phase 2：Flyway で node / edge 表とサンプルグラフ、MyBatis + 再帰 SQL（WITH … CYCLE）で逆向きに辿る（2026-10-31、ADR-0001）
 - [x] Phase 2b：Spring Data JDBC 版を追加し、プロファイル mybatis / datajdbc で切り替え。同じ統合テストが両方で通る（2026-10-31）
 - [ ] Phase 2c：比較の結論を出し、片方に決める（別 ADR）
-- [ ] Phase 3：このリポジトリ自身を解析してグラフにする
+- [x] Phase 3：JavaParser で `src/main/java` を解析し、`POST /api/analysis` でグラフを作り直す。書き込みも MyBatis / Spring Data JDBC の両方（2026-10-31、ADR-0002）
+- [ ] Phase 4：SQL・テーブル・カラムもノードに（MyBatis XML の解析）
 
 ---
 
@@ -246,7 +247,6 @@ components:
   - Oracle の SQL Property Graph（23ai 以降の `GRAPH_TABLE`）… DB を増やさずにグラフクエリ。要検証
   - Neo4j … 見た目は一番楽しいが DB が 1 つ増える
 - **解析対象のサンプル**：このリポジトリ自身 + SI っぽいサンプル（Spring + MyBatis + Oracle）
-- **パーサ**：JavaParser（シンボル解決あり）／Spoon／tree-sitter（多言語・軽量だが型解決なし）
 
 ---
 

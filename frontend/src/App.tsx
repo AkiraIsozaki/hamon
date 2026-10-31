@@ -33,11 +33,22 @@ const graphStyle: cytoscape.StylesheetJson = [
 ]
 
 export default function App() {
-  const [target, setTarget] = useState('com.example.order.OrderService#cancel')
+  const [target, setTarget] = useState('io.github.akiraisozaki.hamon.impact.ImpactRow#toItem')
   const [minProbability, setMinProbability] = useState(0.05)
   const [items, setItems] = useState<ImpactItem[]>([])
   const [error, setError] = useState<string>()
+  const [analysis, setAnalysis] = useState<string>()
   const graphRef = useRef<HTMLDivElement>(null)
+
+  async function analyze() {
+    setAnalysis('解析中…')
+    const { data, error, response } = await api.POST('/analysis')
+    if (error !== undefined || data === undefined) {
+      setAnalysis(`解析エラー: HTTP ${response.status}`)
+      return
+    }
+    setAnalysis(`${data.nodeCount} ノード / ${data.edgeCount} 辺`)
+  }
 
   async function survey(event?: FormEvent) {
     event?.preventDefault()
@@ -65,6 +76,10 @@ export default function App() {
     <div className="app">
       <aside className="panel">
         <h1>hamon</h1>
+        <p className="analysis">
+          <button type="button" onClick={analyze}>ソースを解析してグラフを作り直す</button>
+          {analysis && <span>{analysis}</span>}
+        </p>
         <form onSubmit={survey}>
           <label>
             変更点

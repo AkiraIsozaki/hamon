@@ -40,8 +40,30 @@ paths:
                   $ref: "#/components/schemas/ImpactItem"
         "400":
           description: パラメータ不正
+  /analysis:
+    post:
+      tags: [analysis]
+      operationId: analyzeSources
+      summary: 設定されたソース（hamon.analysis.source-roots）を解析し、依存グラフを作り直す
+      responses:
+        "200":
+          description: 作り直したグラフの大きさ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
 components:
   schemas:
+    AnalysisResult:
+      type: object
+      required: [nodeCount, edgeCount]
+      properties:
+        nodeCount:
+          type: integer
+          description: ノード数
+        edgeCount:
+          type: integer
+          description: 辺の数
     ImpactItem:
       type: object
       required: [node, probability, path]

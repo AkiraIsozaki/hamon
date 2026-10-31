@@ -9,3 +9,4 @@
 .items li { margin: 4px 0; word-break: break-all; }
 .probability { display: inline-block; width: 3.2em; color: #5ec8ff; }
 .error { color: #ff8080; }
+.analysis { display: flex; gap: 10px; align-items: center; font-size: 0.85rem; margin: 0 0 12px; }

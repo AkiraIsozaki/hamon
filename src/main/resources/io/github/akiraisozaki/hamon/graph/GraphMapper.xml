@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.akiraisozaki.hamon.graph.GraphMapper">
+
+  <delete id="deleteAllEdges">DELETE FROM edge</delete>
+  <delete id="deleteAllNodes">DELETE FROM node</delete>
+
+  <insert id="insertNode">
+    INSERT INTO node (name, kind) VALUES (#{name}, #{kind})
+  </insert>
+
+  <select id="selectAllNodes" resultType="io.github.akiraisozaki.hamon.graph.Node">
+    SELECT id, name, kind FROM node
+  </select>
+
+  <insert id="insertEdge">
+    INSERT INTO edge (dependent_id, dependency_id, probability)
+    VALUES (#{dependentId}, #{dependencyId}, #{probability})
+  </insert>
+
+</mapper>

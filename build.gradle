@@ -34,6 +34,8 @@ dependencies {
 	// 生成コードの @Valid / @Min などを実際に検証させる
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	runtimeOnly 'com.oracle.database.jdbc:ojdbc17'
+	// Java ソースの解析（ADR-0002）。symbol-solver は呼び出し先の型解決に使う
+	implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.28.2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-jdbc-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
