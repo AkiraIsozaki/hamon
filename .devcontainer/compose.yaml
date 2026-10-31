@@ -1,0 +1,56 @@
+# devcontainer.json から呼ばれる Compose 定義
+#   app: VS Code / Claude Code が入る開発用コンテナ
+#   db : Oracle AI Database 26ai Free
+#
+# ホストは Linux（Docker Engine）。Docker Desktop と違ってメモリ割り当ての設定は不要で、
+# ホストのメモリをそのまま使う。Oracle Free は最大 2GB 程度使うので、PC 全体で 8GB 以上あると安心
+
+name: hamon
+
+services:
+  app:
+    # Debian 13 (trixie) の素のベース。Java / Node は devcontainer.json の features で入れる
+    image: mcr.microsoft.com/devcontainers/base:trixie
+    command: sleep infinity
+    volumes:
+      # リポジトリ本体（このファイルは .devcontainer/ にあるので .. がリポジトリのルート）
+      - ..:/workspace:cached
+      # Claude Code のログイン情報・設定。Rebuild してもログインし直さなくて済む
+      - claude-config:/home/vscode/.claude
+      # Maven のローカルリポジトリ。Rebuild のたびに依存を落とし直さない
+      - m2-cache:/home/vscode/.m2
+    # 秘密情報（Jev の API キーなど）はリポジトリ直下の .env から環境変数として渡す。
+    # .env は .gitignore 済み。無くてもコンテナは起動する（.env.example をコピーして作る）
+    # .env を書き換えたら「コンテナーのリビルド」で反映される
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      # Claude Code の設定置き場を上のボリュームに向ける
+      CLAUDE_CONFIG_DIR: /home/vscode/.claude
+      # Spring Boot は環境変数をそのまま設定値として読む（spring.datasource.url など）
+      # application.yml に接続情報を書かなくても DB につながる
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@db:1521/FREEPDB1
+      SPRING_DATASOURCE_USERNAME: app
+      SPRING_DATASOURCE_PASSWORD: app
+    # DB の起動完了は待たない（初回は DB 作成に数分かかるため、先にエディタを開けるようにする）
+    depends_on:
+      - db
+
+  db:
+    # Oracle 公式イメージ。容量を抑えたいときは latest-lite に変更（一部機能が省かれる）
+    image: container-registry.oracle.com/database/free:latest
+    environment:
+      # SYS / SYSTEM / PDBADMIN のパスワード（ローカル開発専用）
+      ORACLE_PWD: oracle
+    volumes:
+      # データファイル。コンテナを作り直しても DB の中身は残る
+      - oradata:/opt/oracle/oradata
+      # 初回の DB 作成直後に 1 回だけ実行されるスクリプト（アプリ用ユーザーの作成）
+      - ./oracle-init:/opt/oracle/scripts/setup:ro
+    # 公式イメージにヘルスチェックが組み込まれている（docker ps で healthy になれば利用可）
+
+volumes:
+  claude-config:
+  m2-cache:
+  oradata:

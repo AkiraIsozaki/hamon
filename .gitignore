@@ -1,0 +1,13 @@
+# 秘密情報（Jev の API キーなど）。見本の .env.example だけはコミットする
+.env
+.env.*
+!.env.example
+
+# Claude Code の個人設定（チーム共有の .claude/settings.json はコミットする）
+.claude/settings.local.json
+
+# エディタ・OS
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*~

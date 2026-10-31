@@ -1,0 +1,82 @@
+// hamon（波紋）: Java (Spring Boot) + Oracle + Jev で「確率つき影響調査ツール」を作るための devcontainer
+// 構想メモ: docs/IDEAS.md
+// 参考: Jev の要件定義レビュー https://qiita.com/miso_taku/items/b5e2150055933b51fba3
+// ホスト: Linux Mint + Docker Engine（Compose v2.24 以降が必要。env_file の required: false を使うため）
+//
+// 旧 model_playground からの主な変更点
+//  - 単一イメージ → Docker Compose 構成（app コンテナ + Oracle コンテナ）
+//  - Python イメージ → Debian 13 ベース + Java / Node の feature（Python は uv で必要な時だけ）
+//  - workspaceFolder を固定パス /workspace に（ローカルのフォルダ名に依存しない）
+//  - uv は pip ではなく公式インストーラで入れる（Debian のシステム Python は pip --user を拒否するため）
+//  - Jev の API キーはホストの環境変数ではなく、リポジトリ直下の .env から読む（.env は git 管理外）
+{
+  "name": "hamon",
+
+  // サービス定義は compose.yaml に分離。VS Code が入るのは app コンテナ
+  "dockerComposeFile": "compose.yaml",
+  "service": "app",
+  "runServices": ["app", "db"],
+  "shutdownAction": "stopCompose",
+
+  // compose.yaml でリポジトリを /workspace にマウントしている。
+  // フォルダ名を変えても開けなくなることはない
+  "workspaceFolder": "/workspace",
+  "remoteUser": "vscode",
+  // Linux ではコンテナ内の vscode ユーザーの UID をホストのユーザーに合わせる。
+  // コンテナ内で作ったファイルがホスト側で root 所有などにならない（既定でも true だが明示）
+  "updateRemoteUserUID": true,
+
+  "features": {
+    // Java 25（LTS）。Spring Boot 4 系は Java 17〜25 に対応。
+    // Maven / Gradle は入れない（Spring Initializr が生成する mvnw / gradlew を使う）
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "25",
+      "jdkDistro": "tem"
+    },
+    // フロントエンド（Vite + React 想定）用
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    // GitHub CLI（gh）。Claude Code から PR 作成などに使える
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+    // ※ Claude Code の feature は使わない。
+    //    npm 版がビルド時点でキャッシュされて古いままになり、
+    //    ネイティブ版と二重に入って PATH が混乱するため。
+    //    代わりに post-create.sh でネイティブ版を入れる。
+  },
+
+  "remoteEnv": {
+    // ネイティブ版 claude と uv が入る ~/.local/bin を PATH の先頭に置く
+    "PATH": "/home/vscode/.local/bin:${containerEnv:PATH}"
+    // ※ Jev の API キー（TYPESAFE_API_KEY）は compose.yaml の env_file で .env から渡している
+  },
+
+  "forwardPorts": [8080, 5173, "db:1521"],
+  "portsAttributes": {
+    "8080": { "label": "Spring Boot (API)" },
+    "5173": { "label": "Vite (フロント)" },
+    "db:1521": { "label": "Oracle", "onAutoForward": "silent" }
+  },
+
+  // コンテナ作成後に vscode ユーザーで実行される
+  // （ボリュームの所有者修正、Claude Code ネイティブ版、uv のインストール）
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",      // Java 基本セット（LSP・デバッガ・テスト・Maven）
+        "vmware.vscode-boot-dev-pack",   // Spring Boot Extension Pack
+        "redhat.vscode-yaml",            // YAML（application.yml など）
+        "42Crunch.vscode-openapi",       // OpenAPI 定義の編集・プレビュー
+        "Oracle.sql-developer",          // Oracle 公式の SQL Developer for VS Code
+        "bierner.markdown-mermaid",      // docs/IDEAS.md の図（mermaid）をプレビューで表示
+        "ms-python.python",              // Jev の試し打ち用（uv の venv を認識する）
+        "charliermarsh.ruff"             // Python の Lint / フォーマッタ
+      ],
+      "settings": {
+        "java.configuration.updateBuildConfiguration": "automatic"
+      }
+    }
+  }
+}
