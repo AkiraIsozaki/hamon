@@ -126,7 +126,7 @@ flowchart LR
 |------|------|------|
 | 言語 | Java 25（LTS） | |
 | フレームワーク | Spring Boot 4 系 | Spring Initializr が出す最新安定版を使う。Boot 4 は Java 17〜25 対応 |
-| ビルド | Maven（Wrapper） | SI 現場でなじみが多い方。未決事項参照 |
+| ビルド | Gradle（Wrapper、Groovy DSL） | 開発者の好みで決定（2026-10-31）。`./gradlew` を使う |
 | API | OpenAPI スキーマファースト | `openapi.yaml` → openapi-generator でサーバーのインターフェースとフロントのクライアントを生成 |
 | DB | Oracle AI Database 26ai Free | Dev Container 内のコンテナ |
 | データアクセス | 未決 | MyBatis / Spring Data JDBC / JdbcClient |
@@ -216,7 +216,7 @@ components:
 
 | Phase | テーマ | Spring・API で学べること | ツールとしてできること |
 |-------|--------|--------------------------|------------------------|
-| 0 | 環境 | Dev Container、Spring Initializr、`./mvnw spring-boot:run` | Hello World が返る。Oracle に接続できる |
+| 0 | 環境 | Dev Container、Spring Initializr、`./gradlew bootRun` | Hello World が返る。Oracle に接続できる |
 | 1 | API とグラフ表示 | OpenAPI スキーマファースト、Controller、DI、テスト | ダミーのグラフがブラウザに広がる（ここで早めに楽しむ） |
 | 2 | Oracle に保存 | データアクセス、トランザクション、DB マイグレーション（Flyway など） | ノード・辺のテーブル。再帰 SQL で逆向きに辿れる |
 | 3 | Java を解析 | 設定値の扱い、バッチ的な処理 | **このリポジトリ自身**を解析してグラフにする（自分のコードで試せる） |
@@ -230,7 +230,8 @@ components:
 - [x] アイデア整理（このメモ）
 - [x] 名前決定：hamon
 - [x] Dev Container 定義（Java 25 + Node + Oracle 26ai Free、Jev のキーは .env から）
-- [ ] Phase 0：Spring Initializr でプロジェクト作成、Oracle 接続確認
+- [x] Phase 0：Spring Initializr でプロジェクト作成（Boot 4.1.2 / Java 25 / Gradle）、`/hello` と `/actuator/health` で Oracle 接続確認（2026-10-31）
+- [ ] Phase 1：OpenAPI スキーマファーストで `/impact` を作り、ダミーのグラフをブラウザに表示
 
 ---
 
@@ -243,7 +244,6 @@ components:
   - Neo4j … 見た目は一番楽しいが DB が 1 つ増える
 - **解析対象のサンプル**：このリポジトリ自身 + SI っぽいサンプル（Spring + MyBatis + Oracle）
 - **パーサ**：JavaParser（シンボル解決あり）／Spoon／tree-sitter（多言語・軽量だが型解決なし）
-- **ビルドツール**：Maven（暫定）か Gradle か
 
 ---
 

@@ -28,7 +28,7 @@
 
   "features": {
     // Java 25（LTS）。Spring Boot 4 系は Java 17〜25 に対応。
-    // Maven / Gradle は入れない（Spring Initializr が生成する mvnw / gradlew を使う）
+    // Gradle は入れない（Spring Initializr が生成する gradlew を使う）
     "ghcr.io/devcontainers/features/java:1": {
       "version": "25",
       "jdkDistro": "tem"

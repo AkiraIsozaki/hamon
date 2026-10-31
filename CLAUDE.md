@@ -29,11 +29,14 @@ Java + Oracle のシステムを対象にした「確率つき影響調査ツー
   - `.env` を読んだり、キーの値を表示・ログ出力・コミットしたりしない
   - 新しい秘密情報が必要になったら、`.env.example` にキー名だけ追加する
 - Jev のモデル ID はピン留めする
-- ビルドは Maven Wrapper（`./mvnw`）
+- ビルドは Gradle Wrapper（`./gradlew`）。Gradle 本体はコンテナに入れない
 
 ## よく使うコマンド
 
-（Phase 0 でプロジェクトを作ったら追記する）
+- `./gradlew bootRun` … 起動（http://localhost:8080）
+- `./gradlew test` … テスト
+- `curl localhost:8080/hello` … 疎通確認
+- `curl localhost:8080/actuator/health` … DB を含むヘルス（`components.db.status` が `UP` なら Oracle に繋がっている）
 
 ## Agent skills
 

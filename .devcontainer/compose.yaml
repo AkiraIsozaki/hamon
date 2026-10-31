@@ -17,8 +17,8 @@ services:
       - ..:/workspace:cached
       # Claude Code のログイン情報・設定。Rebuild してもログインし直さなくて済む
       - claude-config:/home/vscode/.claude
-      # Maven のローカルリポジトリ。Rebuild のたびに依存を落とし直さない
-      - m2-cache:/home/vscode/.m2
+      # Gradle のキャッシュ（ラッパー本体と依存）。Rebuild のたびに落とし直さない
+      - gradle-cache:/home/vscode/.gradle
     # 秘密情報（Jev の API キーなど）はリポジトリ直下の .env から環境変数として渡す。
     # .env は .gitignore 済み。無くてもコンテナは起動する（.env.example をコピーして作る）
     # .env を書き換えたら「コンテナーのリビルド」で反映される
@@ -46,11 +46,13 @@ services:
     volumes:
       # データファイル。コンテナを作り直しても DB の中身は残る
       - oradata:/opt/oracle/oradata
-      # 初回の DB 作成直後に 1 回だけ実行されるスクリプト（アプリ用ユーザーの作成）
+      # 初回の DB 作成直後に 1 回だけ実行されるスクリプト（アプリ用ユーザーの作成）。
+      # oradata ボリュームが先に出来ていると走らない（ORA-01017 になる）。その場合は
+      # system/oracle で FREEPDB1 に接続して 01_create_app_user.sql の中身を手で流す
       - ./oracle-init:/opt/oracle/scripts/setup:ro
     # 公式イメージにヘルスチェックが組み込まれている（docker ps で healthy になれば利用可）
 
 volumes:
   claude-config:
-  m2-cache:
+  gradle-cache:
   oradata:

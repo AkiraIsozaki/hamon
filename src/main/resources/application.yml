@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: hamon
+  # DB 接続情報は環境変数 SPRING_DATASOURCE_URL / USERNAME / PASSWORD（compose.yaml）で渡す。ここには書かない
+
+management:
+  endpoint:
+    health:
+      # /actuator/health に db などコンポーネントごとの状態を出す（Oracle 接続確認に使う）
+      show-details: always

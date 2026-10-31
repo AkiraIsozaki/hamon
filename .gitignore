@@ -11,3 +11,23 @@
 !.vscode/extensions.json
 *.swp
 *~
+
+# Gradle / ビルド成果物（Spring Initializr 生成分から必要なものだけ）
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE（Eclipse / STS / IntelliJ）
+.classpath
+.project
+.settings
+.factorypath
+.apt_generated
+.springBeans
+.sts4-cache
+bin/
+.idea
+*.iws
+*.iml
+*.ipr
+out/

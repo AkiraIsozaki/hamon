@@ -4,7 +4,7 @@ set -euo pipefail
 
 echo "[post-create] 1/3 ボリュームの所有者を修正"
 # 名前付きボリュームは root 所有で作られることがあるため
-sudo chown -R vscode:vscode /home/vscode/.claude /home/vscode/.m2
+sudo chown -R vscode:vscode /home/vscode/.claude /home/vscode/.gradle
 
 echo "[post-create] 2/3 Claude Code（ネイティブ版）をインストール"
 # 以後は自動更新される。~/.local/bin に入る（PATH は devcontainer.json の remoteEnv で設定済み）
