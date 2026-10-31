@@ -1,5 +1,14 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "WebSearch"
+    ],
     "deny": [
       "Read(./.env)",
       "Read(./.env.local)"
