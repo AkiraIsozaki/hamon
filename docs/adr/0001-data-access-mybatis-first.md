@@ -10,8 +10,11 @@ Phase 2 でノード・辺を Oracle に保存し、再帰 SQL で逆向きに�
 ## 決定
 
 1. Phase 2 は **MyBatis**（`mybatis-spring-boot-starter` 4.1.x、XML マッパー）で実装する
-2. Phase 2 完了後、同じ API の裏側を **Spring Data JDBC** で実装し直して比較する（学習目的）
-3. DB アクセスは `impact` パッケージの Mapper 1 つに閉じ込め、Controller はそれを呼ぶだけにする。差し替え時に触る範囲を 1 クラスに保つ
+2. Phase 2 完了後、同じ API の裏側を **Spring Data JDBC** でも実装し、Spring プロファイルで切り替えて比較する（学習目的）
+   - `ImpactGraph` インターフェースが共通の seam。`ImpactGraphConfiguration` が `@Profile("mybatis")` / `@Profile("datajdbc")` でどちらを Bean にするか決める
+   - 既定は `mybatis`（application.yml の `spring.profiles.default`）。`--spring.profiles.active=datajdbc` で切り替え
+   - 統合テスト `ImpactApiTest` を `@ActiveProfiles("datajdbc")` のサブクラスで両実装に流す
+3. Controller は `ImpactGraph` を呼ぶだけにし、DB の都合を漏らさない
 4. マイグレーションは **Flyway**（`src/main/resources/db/migration`）
 
 ## 理由
@@ -22,5 +25,5 @@ Phase 2 でノード・辺を Oracle に保存し、再帰 SQL で逆向きに�
 
 ## 影響
 
-- 当面、依存関係に MyBatis が 1 つ増える。Spring Data JDBC を試す際は一時的に両方が入る
+- 依存関係に MyBatis と Spring Data JDBC の両方が入る。比較が済んで片方に決めたら、もう片方と `ImpactGraphConfiguration` を消す（決定は別 ADR）
 - SQL の中に業務知識（確からしさの積、最良経路の選択）が入るので、SQL は実 DB を使う統合テストで守る

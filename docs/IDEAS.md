@@ -233,7 +233,8 @@ components:
 - [x] Phase 0：Spring Initializr でプロジェクト作成（Boot 4.1.2 / Java 25 / Gradle）、`/hello` と `/actuator/health` で Oracle 接続確認（2026-10-31）
 - [x] Phase 1：`openapi.yaml` → 生成 → `GET /api/impact`（固定のダミー候補）、React + Cytoscape でグラフ表示（2026-10-31）
 - [x] Phase 2：Flyway で node / edge 表とサンプルグラフ、MyBatis + 再帰 SQL（WITH … CYCLE）で逆向きに辿る（2026-10-31、ADR-0001）
-- [ ] Phase 2b：同じ API を Spring Data JDBC で実装し直して MyBatis と比較する
+- [x] Phase 2b：Spring Data JDBC 版を追加し、プロファイル mybatis / datajdbc で切り替え。同じ統合テストが両方で通る（2026-10-31）
+- [ ] Phase 2c：比較の結論を出し、片方に決める（別 ADR）
 - [ ] Phase 3：このリポジトリ自身を解析してグラフにする
 
 ---

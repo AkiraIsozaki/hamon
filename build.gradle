@@ -28,6 +28,8 @@ dependencies {
 	// DB マイグレーション。src/main/resources/db/migration の V__*.sql を起動時に適用する
 	implementation 'org.springframework.boot:spring-boot-starter-flyway'
 	runtimeOnly 'org.flywaydb:flyway-database-oracle'
+	// MyBatis との比較用（ADR-0001）。プロファイル datajdbc で使う
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	// 生成コードの @Valid / @Min などを実際に検証させる
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
