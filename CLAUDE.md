@@ -33,10 +33,16 @@ Java + Oracle のシステムを対象にした「確率つき影響調査ツー
 
 ## よく使うコマンド
 
+バックエンド（リポジトリ直下）
 - `./gradlew bootRun` … 起動（http://localhost:8080）
-- `./gradlew test` … テスト
-- `curl localhost:8080/hello` … 疎通確認
+- `./gradlew test` … テスト（`openapi.yaml` からのコード生成も走る。生成先は `build/generated/openapi`）
+- `curl 'localhost:8080/api/impact?target=com.example.order.OrderService%23cancel'` … API の疎通確認
 - `curl localhost:8080/actuator/health` … DB を含むヘルス（`components.db.status` が `UP` なら Oracle に繋がっている）
+
+フロントエンド（`frontend/`）
+- `npm run dev` … 起動（http://localhost:5173。`/api` は 8080 へプロキシ）
+- `npm run api` … `openapi.yaml` から `src/api/schema.d.ts` を再生成（yaml を変えたら必ず実行し、生成物もコミットする）
+- `npm test` … テスト（vitest）
 
 ## Agent skills
 

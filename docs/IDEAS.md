@@ -127,10 +127,10 @@ flowchart LR
 | 言語 | Java 25（LTS） | |
 | フレームワーク | Spring Boot 4 系 | Spring Initializr が出す最新安定版を使う。Boot 4 は Java 17〜25 対応 |
 | ビルド | Gradle（Wrapper、Groovy DSL） | 開発者の好みで決定（2026-10-31）。`./gradlew` を使う |
-| API | OpenAPI スキーマファースト | `openapi.yaml` → openapi-generator でサーバーのインターフェースとフロントのクライアントを生成 |
+| API | OpenAPI スキーマファースト | ルートの `openapi.yaml` が契約。サーバーは openapi-generator（Gradle プラグイン、`spring` 生成器）でインターフェースを生成、フロントは openapi-typescript で型を生成し openapi-fetch で呼ぶ |
 | DB | Oracle AI Database 26ai Free | Dev Container 内のコンテナ |
 | データアクセス | 未決 | MyBatis / Spring Data JDBC / JdbcClient |
-| フロント | React + Vite + TypeScript | バックエンドと分離。グラフ描画は Cytoscape.js などを候補に |
+| フロント | React + Vite + TypeScript | `frontend/`。グラフ描画は Cytoscape.js。TypeScript は openapi-typescript の都合で 5 系に固定 |
 | 解析 | JavaParser など | MyBatis XML は XML として、SQL は SQL パーサで |
 | Jev | REST API 直叩き | `TYPESAFE_API_KEY` はリポジトリ直下の `.env`（git 管理外）からコンテナの環境変数として渡す |
 | 開発環境 | Linux Mint + Docker Engine + VS Code + Dev Container + Claude Code | `.devcontainer/` 参照 |
@@ -231,7 +231,8 @@ components:
 - [x] 名前決定：hamon
 - [x] Dev Container 定義（Java 25 + Node + Oracle 26ai Free、Jev のキーは .env から）
 - [x] Phase 0：Spring Initializr でプロジェクト作成（Boot 4.1.2 / Java 25 / Gradle）、`/hello` と `/actuator/health` で Oracle 接続確認（2026-10-31）
-- [ ] Phase 1：OpenAPI スキーマファーストで `/impact` を作り、ダミーのグラフをブラウザに表示
+- [x] Phase 1：`openapi.yaml` → 生成 → `GET /api/impact`（固定のダミー候補）、React + Cytoscape でグラフ表示（2026-10-31）
+- [ ] Phase 2：Oracle にノード・辺を保存し、再帰 SQL で逆向きに辿る（データアクセス方式の決定が先）
 
 ---
 

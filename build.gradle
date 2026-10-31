@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '4.1.2'
 	id 'io.spring.dependency-management' version '1.1.7'
+	// openapi.yaml から Spring のインターフェースとモデルを生成する（スキーマファースト）
+	id 'org.openapi.generator' version '7.26.0'
 }
 
 group = 'io.github.akiraisozaki'
@@ -22,6 +24,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	// 生成コードの @Valid / @Min などを実際に検証させる
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	runtimeOnly 'com.oracle.database.jdbc:ojdbc17'
 	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-jdbc-test'
@@ -32,3 +36,30 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// ---- OpenAPI コード生成 ----
+// 生成先は build/ 配下（git 管理外）。生成されたコードは手で編集しない
+openApiGenerate {
+	generatorName = 'spring'
+	inputSpec = "$rootDir/openapi.yaml"
+	outputDir = "$buildDir/generated/openapi"
+	apiPackage = 'io.github.akiraisozaki.hamon.api'
+	modelPackage = 'io.github.akiraisozaki.hamon.api.model'
+	configOptions = [
+		useSpringBoot4       : 'true',
+		interfaceOnly        : 'true',   // インターフェースだけ生成し、実装は自分で書く
+		skipDefaultInterface : 'true',   // 未実装メソッドの既定実装（501 を返す）を作らない
+		useTags              : 'true',   // tag 名からインターフェース名を決める（impact → ImpactApi）
+		documentationProvider: 'none',
+		openApiNullable      : 'false',
+	]
+	globalProperties = [
+		apiDocs  : 'false',
+		modelDocs: 'false',
+		apiTests : 'false',
+		modelTests: 'false',
+	]
+}
+
+sourceSets.main.java.srcDir "$buildDir/generated/openapi/src/main/java"
+tasks.named('compileJava') { dependsOn 'openApiGenerate' }

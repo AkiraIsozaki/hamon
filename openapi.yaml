@@ -1,0 +1,63 @@
+openapi: 3.0.3
+info:
+  title: hamon API
+  description: Java + Oracle のシステムを対象にした「確率つき影響調査」の API
+  version: 0.1.0
+servers:
+  - url: /api
+paths:
+  /impact:
+    get:
+      tags: [impact]
+      operationId: surveyImpact
+      summary: 指定したノードを変更したときの影響範囲
+      parameters:
+        - name: target
+          in: query
+          required: true
+          description: 変更するノード（クラス#メソッド、テーブル.カラム など）
+          schema:
+            type: string
+            minLength: 1
+          example: com.example.order.OrderService#cancel
+        - name: minProbability
+          in: query
+          description: この確率未満の候補は返さない（漏れの許容度）
+          schema:
+            type: number
+            format: double
+            minimum: 0
+            maximum: 1
+            default: 0.05
+      responses:
+        "200":
+          description: 影響を受ける候補（確からしさの高い順）
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ImpactItem"
+        "400":
+          description: パラメータ不正
+components:
+  schemas:
+    ImpactItem:
+      type: object
+      required: [node, probability, path]
+      properties:
+        node:
+          type: string
+          description: 影響を受ける候補のノード
+          example: com.example.batch.OrderCancelJob#run
+        probability:
+          type: number
+          format: double
+          description: 影響を受ける確からしさ（0〜1）。経路上の辺の確率の積
+          example: 0.72
+        path:
+          type: array
+          description: 変更点からこのノードへ至る経路（先頭が変更点、末尾がこのノード）
+          items:
+            type: string
+          example: ["com.example.order.OrderService#cancel", "com.example.batch.OrderCancelJob#run"]
