@@ -258,6 +258,10 @@ components:
 
 ---
 
+## 学習ノート
+
+- [落語で学ぶ hamon と Spring](rakugo/README.md) … ソース巡り・Spring の生まれと性分・IDE の呼び出し階層が切れる場所。実コード付き
+
 ## 参考
 
 - [GitLab Knowledge Graph（GitLab Docs）](https://docs.gitlab.com/user/project/repository/knowledge_graph/)
