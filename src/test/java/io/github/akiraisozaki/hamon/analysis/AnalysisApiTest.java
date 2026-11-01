@@ -2,6 +2,7 @@ package io.github.akiraisozaki.hamon.analysis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.assertj.core.api.AbstractObjectArrayAssert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,8 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.transaction.annotation.Transactional;
 
-/** 解析 → 保存 → 影響調査を、フィクスチャのソースで通す。書き込みはテストのトランザクションで巻き戻す */
-@SpringBootTest(properties = "hamon.analysis.source-roots=src/test/resources/analysis-fixture")
+/** 解析 → 保存 → 影響調査を、フィクスチャのソースと実 DB のスキーマで通す。書き込みはテストのトランザクションで巻き戻す */
+@SpringBootTest(properties = {
+		"hamon.analysis.source-roots=src/test/resources/analysis-fixture",
+		"hamon.analysis.mapper-roots=src/test/resources/analysis-fixture" })
 @AutoConfigureMockMvc
 @Transactional
 class AnalysisApiTest {
@@ -19,32 +22,35 @@ class AnalysisApiTest {
 	@Autowired
 	private MockMvcTester mvc;
 
-	@Test
-	void 解析するとノードと辺の数が返る() {
-		var result = mvc.post().uri("/api/analysis").exchange();
-
-		var body = assertThat(result).hasStatus(HttpStatus.OK).bodyJson();
-		body.extractingPath("$.nodeCount").isEqualTo(5);
-		body.extractingPath("$.edgeCount").isEqualTo(5);
+	private AbstractObjectArrayAssert<?, Object> impactOf(String target) {
+		var result = mvc.get().uri("/api/impact").param("target", target).param("minProbability", "0").exchange();
+		return assertThat(result).hasStatus(HttpStatus.OK).bodyJson().extractingPath("$[*].node").asArray();
 	}
 
 	@Test
-	void 解析したグラフで影響調査ができる() {
+	void 解析したグラフでメソッドの影響調査ができる() {
 		mvc.post().uri("/api/analysis").exchange();
 
-		var result = mvc.get().uri("/api/impact").param("target", "fixture.OrderService#cancel").param("minProbability", "0").exchange();
+		impactOf("fixture.OrderService#cancel").containsExactly("fixture.OrderController#cancel", "fixture.Invoker#run");
+	}
 
-		assertThat(result).hasStatus(HttpStatus.OK).bodyJson()
-				.extractingPath("$[*].node").asArray()
-				.containsExactly("fixture.OrderController#cancel", "fixture.Invoker#run");
+	@Test
+	void 列を変更点にするとSQL文からコントローラまで辿れる() {
+		mvc.post().uri("/api/analysis").exchange();
+
+		impactOf("NODE.NAME").containsExactly(
+				"fixture.OrderController#cancel",
+				"fixture.OrderRepository#updateStatus",
+				"fixture.OrderService#cancel",
+				"fixture.Invoker#run");
 	}
 
 	@Test
 	void もう一度解析しても同じ大きさになる() {
-		mvc.post().uri("/api/analysis").exchange();
+		var first = mvc.post().uri("/api/analysis").exchange();
 
-		var result = mvc.post().uri("/api/analysis").exchange();
+		var second = mvc.post().uri("/api/analysis").exchange();
 
-		assertThat(result).hasStatus(HttpStatus.OK).bodyJson().extractingPath("$.nodeCount").isEqualTo(5);
+		assertThat(second).hasStatus(HttpStatus.OK).hasBodyTextEqualTo(new String(first.getResponse().getContentAsByteArray()));
 	}
 }

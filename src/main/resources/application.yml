@@ -21,3 +21,6 @@ hamon:
     # 解析する Java ソースのルート（作業ディレクトリからの相対パス）。まずはこのリポジトリ自身
     source-roots:
       - src/main/java
+    # MyBatis マッパー XML を探すルート。SQL が使う表・列への辺になる（ADR-0004）
+    mapper-roots:
+      - src/main/resources

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- fixture.OrderRepository の SQL。統合テストで実 DB の表に繋がるように、hamon 自身の node / edge 表を使う -->
+<mapper namespace="fixture.OrderRepository">
+
+  <update id="updateStatus">
+    UPDATE node SET kind = #{kind} WHERE name = #{name}
+  </update>
+
+  <select id="countByKind" resultType="int">
+    SELECT COUNT(*) FROM node n JOIN edge e ON e.dependent_id = n.id WHERE n.kind = #{kind}
+  </select>
+
+  <resultMap id="orderMap" type="fixture.Order"/>
+
+</mapper>

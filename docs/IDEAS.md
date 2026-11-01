@@ -131,7 +131,7 @@ flowchart LR
 | DB | Oracle AI Database 26ai Free | Dev Container 内のコンテナ |
 | データアクセス | MyBatis | ADR-0001 で比較し、ADR-0003 で確定。マイグレーションは Flyway |
 | フロント | React + Vite + TypeScript | `frontend/`。グラフ描画は Cytoscape.js。TypeScript は openapi-typescript の都合で 5 系に固定 |
-| 解析 | JavaParser + symbol solver（ADR-0002） | MyBatis XML は XML として、SQL は SQL パーサで（Phase 4） |
+| 解析 | JavaParser + symbol solver（ADR-0002） | MyBatis XML は DOM で読み、SQL が使う表・列は DB 辞書との識別子照合で決める（ADR-0004） |
 | Jev | REST API 直叩き | `TYPESAFE_API_KEY` はリポジトリ直下の `.env`（git 管理外）からコンテナの環境変数として渡す |
 | 開発環境 | Linux Mint + Docker Engine + VS Code + Dev Container + Claude Code | `.devcontainer/` 参照 |
 
@@ -236,7 +236,8 @@ components:
 - [x] Phase 2b：Spring Data JDBC 版を追加し、プロファイル mybatis / datajdbc で切り替え。同じ統合テストが両方で通る（2026-10-31）
 - [x] Phase 2c：MyBatis に決め、Spring Data JDBC 版とプロファイル切り替えを削除（2026-11-01、ADR-0003）
 - [x] Phase 3：JavaParser で `src/main/java` を解析し、`POST /api/analysis` でグラフを作り直す。書き込みも MyBatis / Spring Data JDBC の両方（2026-10-31、ADR-0002）
-- [ ] Phase 4：SQL・テーブル・カラムもノードに（MyBatis XML の解析）
+- [x] Phase 4：Oracle の辞書から表・列をノードに、MyBatis XML の SQL 文から表・列へ辺を張る。`NODE.NAME` を変更点にして Controller まで辿れる（2026-11-01、ADR-0004）
+- [ ] Phase 5：Jev であいまいな辺に確からしさを付ける
 
 ---
 

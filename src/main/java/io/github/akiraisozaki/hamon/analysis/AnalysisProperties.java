@@ -6,19 +6,27 @@ import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/** application.yml の hamon.analysis.* 。起動時に束ねられ、不正なら起動が失敗する */
+/**
+ * application.yml の hamon.analysis.* 。起動時に束ねられ、不正なら起動が失敗する。
+ * sourceRoots は Java ソース、mapperRoots は MyBatis マッパー XML を探すディレクトリ
+ */
 @ConfigurationProperties("hamon.analysis")
-public record AnalysisProperties(List<Path> sourceRoots) {
+public record AnalysisProperties(List<Path> sourceRoots, List<Path> mapperRoots) {
 
 	public AnalysisProperties {
-		if (sourceRoots == null || sourceRoots.isEmpty()) {
-			throw new IllegalArgumentException("hamon.analysis.source-roots を 1 つ以上設定してください");
+		sourceRoots = directories("hamon.analysis.source-roots", sourceRoots);
+		mapperRoots = directories("hamon.analysis.mapper-roots", mapperRoots);
+	}
+
+	private static List<Path> directories(String property, List<Path> roots) {
+		if (roots == null || roots.isEmpty()) {
+			throw new IllegalArgumentException(property + " を 1 つ以上設定してください");
 		}
-		for (Path root : sourceRoots) {
+		for (Path root : roots) {
 			if (!Files.isDirectory(root)) {
-				throw new IllegalArgumentException("hamon.analysis.source-roots がディレクトリでない: " + root.toAbsolutePath());
+				throw new IllegalArgumentException(property + " がディレクトリでない: " + root.toAbsolutePath());
 			}
 		}
-		sourceRoots = List.copyOf(sourceRoots);
+		return List.copyOf(roots);
 	}
 }

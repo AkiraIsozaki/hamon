@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.akiraisozaki.hamon.analysis.SchemaMapper">
+
+  <!-- 接続ユーザーが持つ表と列。解析対象システムと同じ DB に繋いでいる前提（ADR-0004） -->
+  <select id="selectColumns" resultType="io.github.akiraisozaki.hamon.analysis.TableColumn">
+    SELECT table_name, column_name
+      FROM user_tab_columns
+     ORDER BY table_name, column_id
+  </select>
+
+</mapper>
