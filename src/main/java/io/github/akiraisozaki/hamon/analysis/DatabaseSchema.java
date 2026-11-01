@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import io.github.akiraisozaki.hamon.graph.DependencyEdge;
 import io.github.akiraisozaki.hamon.graph.NodeKind;
+import io.github.akiraisozaki.hamon.judgment.Ambiguity;
+import io.github.akiraisozaki.hamon.judgment.DependencyJudge;
 
 /**
  * 解析対象システムの DB にある表と列。表名・列名は Oracle の辞書どおり大文字。
@@ -48,18 +50,21 @@ public record DatabaseSchema(Map<String, Set<String>> columnsByTable) {
 
 	/**
 	 * sql が使っている表と列への、dependent からの辺。
-	 * 表名が出てくれば確実な辺。列名は、それを持つ表が参照表の中に 1 つなら確実、複数ならあいまいな辺
+	 * 表名が出てくれば確実な辺。列名は、それを持つ表が参照表の中に 1 つなら確実、複数ならどの表の列かを judge（Jev）に聞く
 	 */
-	List<DependencyEdge> dependenciesOf(String dependent, String sql) {
+	List<DependencyEdge> dependenciesOf(String dependent, String sql, DependencyJudge judge) {
 		Set<String> identifiers = identifiersIn(sql);
 		List<String> tables = columnsByTable.keySet().stream().filter(identifiers::contains).toList();
 		List<DependencyEdge> edges = new ArrayList<>();
 		tables.forEach(table -> edges.add(DependencyEdge.certain(dependent, table)));
 		for (String identifier : identifiers) {
-			List<String> owners = tables.stream().filter(table -> columnsByTable.get(table).contains(identifier)).toList();
-			for (String owner : owners) {
-				String column = owner + "." + identifier;
-				edges.add(owners.size() == 1 ? DependencyEdge.certain(dependent, column) : DependencyEdge.ambiguous(dependent, column));
+			Map<String, Set<String>> owners = new LinkedHashMap<>();
+			tables.stream().filter(table -> columnsByTable.get(table).contains(identifier)).forEach(table -> owners.put(table, columnsByTable.get(table)));
+			if (owners.size() == 1) {
+				edges.add(DependencyEdge.certain(dependent, owners.keySet().iterator().next() + "." + identifier));
+			} else if (owners.size() > 1) {
+				judge.judge(Ambiguity.columnReference(dependent, sql, identifier, owners))
+						.forEach((column, probability) -> edges.add(new DependencyEdge(dependent, column, probability)));
 			}
 		}
 		return edges;

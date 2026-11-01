@@ -6,18 +6,37 @@ import org.assertj.core.api.AbstractObjectArrayAssert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.transaction.annotation.Transactional;
 
-/** 解析 → 保存 → 影響調査を、フィクスチャのソースと実 DB のスキーマで通す。書き込みはテストのトランザクションで巻き戻す */
+import io.github.akiraisozaki.hamon.judgment.DependencyJudge;
+import io.github.akiraisozaki.hamon.judgment.FixedDependencyJudge;
+
+/**
+ * 解析 → 保存 → 影響調査を、フィクスチャのソースと実 DB のスキーマで通す。書き込みはテストのトランザクションで巻き戻す。
+ * Jev は管理外の外部 API なので、固定値を返す判定に差し替える
+ */
 @SpringBootTest(properties = {
 		"hamon.analysis.source-roots=src/test/resources/analysis-fixture",
 		"hamon.analysis.mapper-roots=src/test/resources/analysis-fixture" })
 @AutoConfigureMockMvc
 @Transactional
 class AnalysisApiTest {
+
+	@TestConfiguration
+	static class FixedJudgeConfiguration {
+
+		@Bean
+		@Primary // 本物の JevDependencyJudge も Bean として居るので、こちらを優先させる
+		DependencyJudge fixedJudge() {
+			return new FixedDependencyJudge(0.5);
+		}
+	}
 
 	@Autowired
 	private MockMvcTester mvc;

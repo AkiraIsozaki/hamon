@@ -103,6 +103,7 @@ flowchart LR
 ```
 
 - エンドポイント: `POST https://api.typesafe.ai/v1/systemone`（`Authorization: Bearer $TYPESAFE_API_KEY`）
+- **質問文と state のキーは英語で書く**。公式ドキュメントに「英語が主、CJK は精度が落ちる」とある（上の日本語の例はイメージ）。実装は `judgment/Ambiguity.java`（ADR-0005）
 - 必須フィールドは `model` / `state` / `questions` の 3 つ
 - **ただの HTTP API なので、Java から Spring の `RestClient` で直接呼べる**（SDK 不要）。Python は試し打ち用
 
@@ -116,7 +117,7 @@ flowchart LR
 
 - 「幻覚しない」は出力形式の話。答えが正しい保証ではない
 - 精度・速度・価格の数字は 2026-10 時点で TypeSafe 自身の発表のみ。自分のリポジトリで確かめる価値がある
-- アーリーアクセス。モデルは更新されるので、ID はピン留めして判定ログに残す（2026-09 時点: `jev-latest` → `jev-1.13.0`）
+- アーリーアクセス。モデルは更新されるので、ID はピン留めして判定ログに残す（2026-11 時点: `jev-latest` → `jev-1.14.0`。`hamon.jev.model` で指定）
 
 ---
 
@@ -237,7 +238,8 @@ components:
 - [x] Phase 2c：MyBatis に決め、Spring Data JDBC 版とプロファイル切り替えを削除（2026-11-01、ADR-0003）
 - [x] Phase 3：JavaParser で `src/main/java` を解析し、`POST /api/analysis` でグラフを作り直す。書き込みも MyBatis / Spring Data JDBC の両方（2026-10-31、ADR-0002）
 - [x] Phase 4：Oracle の辞書から表・列をノードに、MyBatis XML の SQL 文から表・列へ辺を張る。`NODE.NAME` を変更点にして Controller まで辿れる（2026-11-01、ADR-0004）
-- [ ] Phase 5：Jev であいまいな辺に確からしさを付ける
+- [x] Phase 5：あいまいな辺（同名メソッド・複数表の列名）を Jev に Noul で判定させ、答えをそのまま確からしさにする。`RestClient` + `@Retryable`。質問は英語（2026-11-01、ADR-0005）
+- [ ] Phase 6：Claude でレポート / MCP 化
 
 ---
 

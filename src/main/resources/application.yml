@@ -24,3 +24,9 @@ hamon:
     # MyBatis マッパー XML を探すルート。SQL が使う表・列への辺になる（ADR-0004）
     mapper-roots:
       - src/main/resources
+  jev:
+    base-url: https://api.typesafe.ai
+    # API キーはリポジトリ直下の .env → コンテナの環境変数。ここに値を書かない
+    api-key: ${TYPESAFE_API_KEY}
+    # モデルは版をピン留めする。エイリアス（jev-latest）は更新で答えが変わる。答えた版は判定ログにも出る
+    model: jev-1.14.0

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import io.github.akiraisozaki.hamon.graph.DependencyEdge;
 import io.github.akiraisozaki.hamon.graph.DependencyGraph;
 import io.github.akiraisozaki.hamon.graph.NodeKind;
+import io.github.akiraisozaki.hamon.judgment.FixedDependencyJudge;
 
 class MyBatisMapperAnalysisTest {
 
@@ -22,7 +23,7 @@ class MyBatisMapperAnalysisTest {
 		DatabaseSchema schema = new DatabaseSchema(Map.of(
 				"NODE", Set.of("ID", "NAME", "KIND"),
 				"EDGE", Set.of("ID", "DEPENDENT_ID", "DEPENDENCY_ID", "PROBABILITY")));
-		return new MyBatisMapperAnalysis().analyze(List.of(Path.of("src/test/resources/analysis-fixture")), schema);
+		return new MyBatisMapperAnalysis(new FixedDependencyJudge(0.5)).analyze(List.of(Path.of("src/test/resources/analysis-fixture")), schema);
 	}
 
 	@Test

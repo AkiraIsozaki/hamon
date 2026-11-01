@@ -24,6 +24,7 @@ import org.xml.sax.SAXException;
 import io.github.akiraisozaki.hamon.graph.DependencyEdge;
 import io.github.akiraisozaki.hamon.graph.DependencyGraph;
 import io.github.akiraisozaki.hamon.graph.NodeKind;
+import io.github.akiraisozaki.hamon.judgment.DependencyJudge;
 
 /**
  * MyBatis のマッパー XML を読み、SQL 文を「namespace#id」の METHOD ノード（Mapper メソッドと同じ名前）にして、
@@ -34,6 +35,12 @@ import io.github.akiraisozaki.hamon.graph.NodeKind;
 public class MyBatisMapperAnalysis {
 
 	private static final Set<String> STATEMENT_TAGS = Set.of("select", "insert", "update", "delete");
+
+	private final DependencyJudge judge;
+
+	public MyBatisMapperAnalysis(DependencyJudge judge) {
+		this.judge = judge;
+	}
 
 	public DependencyGraph analyze(List<Path> mapperRoots, DatabaseSchema schema) {
 		Map<String, NodeKind> nodes = new LinkedHashMap<>(schema.nodes());
@@ -46,7 +53,7 @@ public class MyBatisMapperAnalysis {
 				}
 				String node = namespace + "#" + statement.getAttribute("id");
 				nodes.put(node, NodeKind.METHOD);
-				edges.addAll(schema.dependenciesOf(node, statement.getTextContent()));
+				edges.addAll(schema.dependenciesOf(node, statement.getTextContent(), judge));
 			}
 		}
 		return new DependencyGraph(nodes, edges);

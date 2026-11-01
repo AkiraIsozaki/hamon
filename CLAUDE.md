@@ -37,7 +37,7 @@ Java + Oracle のシステムを対象にした「確率つき影響調査ツー
 - `./gradlew bootRun` … 起動（http://localhost:8080）。データアクセスは MyBatis（ADR-0003）
 - `./gradlew test` … テスト（`openapi.yaml` からのコード生成も走る。生成先は `build/generated/openapi`。統合テストは Oracle が起きている必要がある）
 - DB の変更は `src/main/resources/db/migration/V{n}__{説明}.sql` を足す（Flyway が起動時に適用。適用済みの V ファイルは編集しない）
-- `curl -X POST localhost:8080/api/analysis` … `hamon.analysis.source-roots`（既定: `src/main/java`）の Java と `mapper-roots`（既定: `src/main/resources`）の MyBatis XML、接続中の DB の表・列を解析してグラフを作り直す
+- `curl -X POST localhost:8080/api/analysis` … `hamon.analysis.source-roots`（既定: `src/main/java`）の Java と `mapper-roots`（既定: `src/main/resources`）の MyBatis XML、接続中の DB の表・列を解析してグラフを作り直す。あいまいな辺は Jev に判定させる（実際に API を呼ぶ。判定はログに `Jev jev-x.y.z が … を判定` と出る）
 - `curl 'localhost:8080/api/impact?target=io.github.akiraisozaki.hamon.impact.ImpactRow%23toItem'` … 影響調査の疎通確認。列なら `target=EDGE.PROBABILITY`
 - `curl localhost:8080/actuator/health` … DB を含むヘルス（`components.db.status` が `UP` なら Oracle に繋がっている）
 
