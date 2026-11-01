@@ -1,10 +1,6 @@
 spring:
   application:
     name: hamon
-  profiles:
-    # データアクセスの実装を選ぶ（ADR-0001）。mybatis / datajdbc。
-    # 切り替えは --spring.profiles.active=datajdbc（既定値はここ）
-    default: mybatis
   # DB 接続情報は環境変数 SPRING_DATASOURCE_URL / USERNAME / PASSWORD（compose.yaml）で渡す。ここには書かない
 
 management:

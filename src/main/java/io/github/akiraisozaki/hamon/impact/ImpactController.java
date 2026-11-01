@@ -14,9 +14,9 @@ import io.github.akiraisozaki.hamon.api.model.ImpactItem;
 @RequestMapping("/api") // openapi.yaml の servers.url。生成コードには付かないのでここで付ける
 class ImpactController implements ImpactApi {
 
-	private final ImpactGraph graph;
+	private final ImpactMapper graph;
 
-	ImpactController(ImpactGraph graph) {
+	ImpactController(ImpactMapper graph) {
 		this.graph = graph;
 	}
 

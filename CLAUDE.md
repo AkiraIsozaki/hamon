@@ -34,7 +34,7 @@ Java + Oracle のシステムを対象にした「確率つき影響調査ツー
 ## よく使うコマンド
 
 バックエンド（リポジトリ直下）
-- `./gradlew bootRun` … 起動（http://localhost:8080）。データアクセスは既定で MyBatis。Spring Data JDBC 版は `./gradlew bootRun --args='--spring.profiles.active=datajdbc'`（ADR-0001）
+- `./gradlew bootRun` … 起動（http://localhost:8080）。データアクセスは MyBatis（ADR-0003）
 - `./gradlew test` … テスト（`openapi.yaml` からのコード生成も走る。生成先は `build/generated/openapi`。統合テストは Oracle が起きている必要がある）
 - DB の変更は `src/main/resources/db/migration/V{n}__{説明}.sql` を足す（Flyway が起動時に適用。適用済みの V ファイルは編集しない）
 - `curl -X POST localhost:8080/api/analysis` … `hamon.analysis.source-roots`（既定: このリポジトリの `src/main/java`）を解析してグラフを作り直す

@@ -1,6 +1,6 @@
 # hamon（波紋）構想メモ
 
-最終更新: 2026-10-31
+最終更新: 2026-11-01
 
 ## ひとことで
 
@@ -129,7 +129,7 @@ flowchart LR
 | ビルド | Gradle（Wrapper、Groovy DSL） | 開発者の好みで決定（2026-10-31）。`./gradlew` を使う |
 | API | OpenAPI スキーマファースト | ルートの `openapi.yaml` が契約。サーバーは openapi-generator（Gradle プラグイン、`spring` 生成器）でインターフェースを生成、フロントは openapi-typescript で型を生成し openapi-fetch で呼ぶ |
 | DB | Oracle AI Database 26ai Free | Dev Container 内のコンテナ |
-| データアクセス | MyBatis（まず）→ Spring Data JDBC（比較） | ADR-0001。マイグレーションは Flyway |
+| データアクセス | MyBatis | ADR-0001 で比較し、ADR-0003 で確定。マイグレーションは Flyway |
 | フロント | React + Vite + TypeScript | `frontend/`。グラフ描画は Cytoscape.js。TypeScript は openapi-typescript の都合で 5 系に固定 |
 | 解析 | JavaParser + symbol solver（ADR-0002） | MyBatis XML は XML として、SQL は SQL パーサで（Phase 4） |
 | Jev | REST API 直叩き | `TYPESAFE_API_KEY` はリポジトリ直下の `.env`（git 管理外）からコンテナの環境変数として渡す |
@@ -234,7 +234,7 @@ components:
 - [x] Phase 1：`openapi.yaml` → 生成 → `GET /api/impact`（固定のダミー候補）、React + Cytoscape でグラフ表示（2026-10-31）
 - [x] Phase 2：Flyway で node / edge 表とサンプルグラフ、MyBatis + 再帰 SQL（WITH … CYCLE）で逆向きに辿る（2026-10-31、ADR-0001）
 - [x] Phase 2b：Spring Data JDBC 版を追加し、プロファイル mybatis / datajdbc で切り替え。同じ統合テストが両方で通る（2026-10-31）
-- [ ] Phase 2c：比較の結論を出し、片方に決める（別 ADR）
+- [x] Phase 2c：MyBatis に決め、Spring Data JDBC 版とプロファイル切り替えを削除（2026-11-01、ADR-0003）
 - [x] Phase 3：JavaParser で `src/main/java` を解析し、`POST /api/analysis` でグラフを作り直す。書き込みも MyBatis / Spring Data JDBC の両方（2026-10-31、ADR-0002）
 - [ ] Phase 4：SQL・テーブル・カラムもノードに（MyBatis XML の解析）
 

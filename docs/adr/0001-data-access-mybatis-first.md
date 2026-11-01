@@ -1,6 +1,6 @@
 # ADR-0001: データアクセスはまず MyBatis、その後 Spring Data JDBC と比較する
 
-日付: 2026-10-31 / 状態: 採用
+日付: 2026-10-31 / 状態: 採用 → 比較完了。2 項（Spring Data JDBC との比較）は ADR-0003 で MyBatis に確定し、Data JDBC 版は削除した
 
 ## 文脈
 
