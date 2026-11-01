@@ -1,13 +1,15 @@
 # 落語で学ぶ hamon と Spring
 
 このリポジトリを作りながら Spring に慣れるための学習メモ。江戸落語のご隠居と八五郎の掛け合いで、
-hamon の実コードを引きながら解説する。コードはすべてこのリポジトリからの抜粋（2026-11-01 時点、Phase 3 完了後）。
+hamon の実コードを引きながら解説する。コードはすべてこのリポジトリからの抜粋（2026-11-01 時点、Phase 6 完了＋フロント断面合わせ後）。
 
 | # | 演目 | 中身 |
 |---|------|------|
-| 1 | [hamon 一席、ソース巡り](01-source-tour.md) | 2 本の API の流れと、Spring の考え方が出てくる 10 か所を実コードで |
+| 1 | [hamon 一席、ソース巡り](01-source-tour.md) | 3 本の API と MCP の流れと、Spring の考え方が出てくる 10 か所を実コードで |
 | 2 | [Spring という子の生まれと性分](02-spring-philosophy.md) | J2EE からの歴史、制御の反転、「`new` がない」との付き合い方 |
-| 3 | [右クリックの神様（呼び出し階層）](03-call-hierarchy.md) | IDE の呼び出し階層が Spring で切れる 5 か所と、今の hamon の限界 |
+| 3 | [右クリックの神様（呼び出し階層）](03-call-hierarchy.md) | IDE の呼び出し階層が Spring で切れる 5 か所と、今の hamon がどこまで橋を架けたか（実測つき） |
 | 4 | [DI の名簿](04-di-roster.md) | Bean 全員と注入箇所全部を省略なしで。縁結びの規則、起動の順番、影武者、実物の起動失敗メッセージ |
+| 5 | [目利きと取次（Jev と MCP）](05-jev-and-mcp.md) | Phase 4〜6 で出てきた Spring：`@Primary` での差し替え、`RestClient`、`@Retryable`、Spring AI の MCP サーバー、本当のポートで開けるテスト |
 
-コードが変わると抜粋は古くなる。食い違ったらコードが正。Phase 2c（ADR-0003）で Spring Data JDBC 版・`@Profile` 切り替え・`ImpactGraph` / `GraphStore` インターフェースは削除済み。各演目のそれらの説明は「当時はこうだった」として読む。
+コードが変わると抜粋は古くなる。食い違ったらコードが正。
+Phase 2c（ADR-0003）で消えた Spring Data JDBC 版・`@Profile`・`ImpactGraph`・`GraphStore` インターフェースは、各演目では「当時はこうだった」として触れるだけになっている。

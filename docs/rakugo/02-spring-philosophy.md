@@ -5,8 +5,8 @@
 
 ## 枕：あれ、ないぞ
 
-八「ご隠居、どうにも馴染めねえんです。`ImpactController` が `ImpactGraph` を使ってる。じゃあ誰が `ImpactGraph` を `new` してるんだと、ソースを全部ひっくり返したんですが、ねえんですよ。
-`new ImpactController` もねえ。`new MyBatisGraphStore` もねえ。幽霊屋敷ですよ」
+八「ご隠居、どうにも馴染めねえんです。`ImpactController` が `ImpactSurvey` を使ってる。じゃあ誰が `ImpactSurvey` を `new` してるんだと、ソースを全部ひっくり返したんですが、ねえんですよ。
+`new ImpactController` もねえ。`new GraphStore` もねえ。幽霊屋敷ですよ」
 
 隠「おめえ、長屋に越してきたとき、井戸を誰が掘ったか探したか」
 
@@ -65,26 +65,26 @@
 ```java
 // 昔風。使う側が、使われる側を取りに行く
 class ImpactController {
-	private final ImpactGraph graph = new MyBatisImpactGraph(new ImpactMapperImpl(new SqlSessionFactory(...)));
+	private final ImpactSurvey survey = new ImpactSurvey(new ImpactMapperImpl(new SqlSessionFactory(...)));
 }
 ```
 
 隠「Controller が自分で Mapper を作り、Mapper が自分で接続を作る。『使う側が取りに行く』。
-これだと Controller が MyBatis を知ってる。Data JDBC に替えるには Controller を直す。テストで偽物を渡せねえ」
+これだと Controller が MyBatis を知ってる。Mapper の作り方が変われば Controller を直す。テストで偽物を渡せねえ」
 
 八「で、Spring だと」
 
 ```java
 class ImpactController implements ImpactApi {
-	private final ImpactGraph graph;
+	private final ImpactSurvey survey;
 
-	ImpactController(ImpactGraph graph) {   // 「欲しい」と手を出すだけ
-		this.graph = graph;
+	ImpactController(ImpactSurvey survey) {   // 「欲しい」と手を出すだけ
+		this.survey = survey;
 	}
 }
 ```
 
-隠「Controller は『`ImpactGraph` が欲しい』と手を出すだけ。誰が、いつ、どの実装を作って渡すかは、容れ物の側の都合。これが『反転』だ。
+隠「Controller は『`ImpactSurvey` が欲しい』と手を出すだけ。誰が、いつ、どの実装を作って渡すかは、容れ物の側の都合。これが『反転』だ。
 ハリウッドの原則とも言う。『こっちから電話するな、こっちから掛ける』」
 
 八「じゃあ、いったい誰が作ってるんです。幽霊じゃねえんでしょう」
@@ -93,9 +93,9 @@ class ImpactController implements ImpactApi {
 
 | 作り手 | 印 | hamon での例 |
 |---|---|---|
-| クラス自身が名乗る | `@Component` `@RestController` `@Configuration` `@Mapper` | `JavaSourceAnalysis`、`MyBatisGraphStore`、`ImpactController` |
-| 番頭が作って返す | `@Configuration` の中の `@Bean` メソッド | `ImpactGraphConfiguration` の `myBatisImpactGraph` |
-| 蔵（starter）が勝手に作る | 依存を足しただけ。コードには出てこない | DataSource、SqlSessionFactory、`ImpactRepository` の実装 |
+| クラス自身が名乗る | `@Component` `@RestController` `@Configuration` `@Mapper` | `JavaSourceAnalysis`、`GraphStore`、`ImpactController`、`HamonTools` |
+| 番頭が作って返す | `@Configuration` の中の `@Bean` メソッド | 本番コードには無い。テストの `AnalysisApiTest` の `@TestConfiguration` で `DependencyJudge` を返す `fixedJudge` だけ |
+| 蔵（starter）が勝手に作る | 依存を足しただけ。コードには出てこない | DataSource、SqlSessionFactory、`@Mapper` 三人の実装、MCP サーバー |
 
 隠「`new` を探すのはやめろ。この三つの印を探せ。印がねえクラスは Bean じゃねえ。Bean じゃねえもんは、おめえが `new` する。
 hamon で言えば `DependencyGraph` も `DependencyEdge` も `ImpactRow` も `new` してるだろう」
@@ -104,7 +104,7 @@ hamon で言えば `DependencyGraph` も `DependencyEdge` も `ImpactRow` も `n
 
 隠「ここが肝だ。Spring の長屋には二種類の住人がいる。**役**と**物**だ」
 
-- **役**は、長屋に一人いれば足りる働き手。Controller、Store、Mapper、解析屋。依存を持ち、状態を持たず、起動から終了まで一人で勤める。これが Bean
+- **役**は、長屋に一人いれば足りる働き手。Controller、Store、Mapper、解析屋、目利き（`JevDependencyJudge`）、取次（`HamonTools`）。依存を持ち、状態を持たず、起動から終了まで一人で勤める。これが Bean
 - **物**は、仕事のたびに生まれて消える品物。グラフ、辺、行、設定値の塊。これは `new` する。record で作ってあるのがだいたいこれ
 
 隠「おめえが探して見つからなかったのは全部**役**だ。**物**は今でも `new` してる。
@@ -136,7 +136,7 @@ Spring の配線は世界中の人間が同じ作法で書いて、同じ落と�
 
 - **見えない。** 配線がコードにねえから、`new` を追う読み方が効かねえ。これはおめえの悩みそのものだ
 - **スタックトレースが長い。** 影武者が何枚も挟まるから、例外のトレースの八割が Spring の中だ。自分のクラス名が出てる行だけ読む癖をつけろ
-- **魔法が外れたときに難しい。** 動いてるときは楽だが、Bean が二つあって選べねえ、プロファイルの看板が違う、影武者が `this` 呼びで効かねえ。
+- **魔法が外れたときに難しい。** 動いてるときは楽だが、Bean が二つあって選べねえ、`@Primary` で立てた片方しか見てなかった、影武者が `this` 呼びで効かねえ。
   こういうときは「Spring がどう考えたか」を知らねえと直せねえ
 
 隠「だから、Spring と付き合うってのは『魔法を信じる』ことじゃねえ。『魔法の手順を一度は知っておいて、普段は忘れてる』ことだ」
@@ -167,8 +167,8 @@ Spring の配線は世界中の人間が同じ作法で書いて、同じ落と�
 隠「みんなそう言った。XML 地獄とな。『EJB の重さから逃げてきたのに、Spring 自身が重くなった』と。そこで直しが二回入る」
 
 - 二千七年、Spring 2.5 で注釈が入った。`@Autowired`、`@Component`。クラスに印をつけりゃ XML に書かなくていい
-- 二千九年、Spring 3.0 で Java 設定が入った。`@Configuration` と `@Bean`。XML を Java で書けるようになった。`ImpactGraphConfiguration` はこの子孫。
-  二千十一年の 3.1 で `@Profile` も入った
+- 二千九年、Spring 3.0 で Java 設定が入った。`@Configuration` と `@Bean`。XML を Java で書けるようになった。テストの `FixedJudgeConfiguration` はこの子孫。
+  二千十一年の 3.1 で `@Profile` も入った。hamon は 2b で使い、2c で消した（ADR-0003）
 
 隠「それでも『Spring を始めるには設定を百行書く』は残った。そこで二千十四年、**Spring Boot** だ」
 
@@ -184,7 +184,7 @@ Spring の配線は世界中の人間が同じ作法で書いて、同じ落と�
 **Twelve-Factor App** てえ作法だ。Boot は最初からこれに合わせて、環境変数を設定として読む。
 hamon の Dev Container が `SPRING_DATASOURCE_URL` で渡してるのは、まさにその作法に乗ってる」
 
-八「じゃあ hamon の yaml にある `spring.profiles.default: mybatis` とか `mybatis.configuration.*` とか `hamon.analysis.*` は」
+八「じゃあ hamon の yaml にある `spring.ai.mcp.server.*` とか `mybatis.configuration.*` とか `hamon.analysis.*`、`hamon.jev.*` は」
 
 隠「全部『既定と違うところ』か『Spring が知らねえ自前の値』だ。Spring の既定で済むものは一行もねえ。それが Boot との正しい付き合い方だ」
 
@@ -197,11 +197,12 @@ hamon の Dev Container が `SPRING_DATASOURCE_URL` で渡してるのは、ま�
 | 2003〜2004 | Spring オープンソース化、1.0 | |
 | 2004〜2008 | XML 設定の時代 | （ない。幸い） |
 | 2007 | Spring 2.5、注釈 | `@Component`、`@Autowired`（テストのみ） |
-| 2009 | Spring 3.0、Java 設定 | `@Configuration` + `@Bean` |
-| 2011 | Spring 3.1、プロファイル | `@Profile("mybatis")` |
+| 2009 | Spring 3.0、Java 設定 | `@Configuration` + `@Bean`（今はテストの `@TestConfiguration` にだけ） |
+| 2011 | Spring 3.1、プロファイル | `@Profile`（2b で使い、2c で削除。ADR-0003） |
 | 2014 | Spring Boot 1.0、設定より規約、starter | `build.gradle` の starter、短い `application.yml` |
 | 2022 | Boot 3、Java 17 と Jakarta EE | `jakarta.validation` の import |
-| 2025 | Boot 4 | このリポジトリ（Boot 4.1.2） |
+| 2025 | Boot 4、Framework 7 | このリポジトリ（Boot 4.1.2）。`@Retryable` が本体に入った（`org.springframework.resilience`） |
+| 2025 | Spring AI 2.0 | MCP サーバー（`@McpTool`、ADR-0006） |
 
 ---
 
@@ -214,7 +215,7 @@ hamon の Dev Container が `SPRING_DATASOURCE_URL` で渡してるのは、ま�
 **その一、問いを変える。**
 「どこで `new` してる」ではなく「誰がこの型を**欲しがってて**、誰がこの型を**名乗ってる**か」。
 欲しがる側はコンストラクタの引数、名乗る側は注釈か `@Bean`。IDE で型の「実装を探す」を使う。
-`GraphStore` の実装を探せば `MyBatisGraphStore` と `DataJdbcGraphStore` が出て、`@Profile` が見える。
+`DependencyJudge` の実装を探せば `JevDependencyJudge` と、テストの `FixedDependencyJudge` が出て、テストの `@Primary` が見える。
 
 **その二、実際に聞く。** Spring は自分の頭の中を見せてくれる。
 
@@ -241,11 +242,11 @@ hamon は Actuator がもう入っているので yaml に足すだけ（未検�
 迷ったら「これが二つあったら困るか」。困るなら役。
 
 **その四、役を `new` しない、`static` で取りに行かない。**
-プロダクションコードで `new MyBatisGraphStore(...)` と書いた瞬間、影武者が外れて `@Transactional` が効かなくなる。シングルトンの `getInstance()` も同じ。
+プロダクションコードで `new GraphStore(mapper)` と書いた瞬間、影武者が外れて `@Transactional` が効かなくなる。シングルトンの `getInstance()` も同じ。
 欲しいなら手を出す。これだけは自社フレームワーク時代の癖と真っ向ぶつかるから、意識して直す。
 
 **その五、Spring が転んだら「Spring がどう考えたか」のログを読む。**
-起動失敗のメッセージは実はよく書けてる。「`ImpactGraph` 型の Bean が二つ見つかった」「`hamon.analysis.source-roots` の束縛に失敗した」と、だいたい一行で原因を言ってる。
+起動失敗のメッセージは実はよく書けてる。「`DependencyJudge` 型の Bean が二つ見つかった」「`hamon.jev` の束縛に失敗した」と、だいたい一行で原因を言ってる。
 トレースの下の方じゃなくて、`APPLICATION FAILED TO START` の直後の `Description` と `Action` を読む。
 
 八「五つですか。覚えられるかな」
