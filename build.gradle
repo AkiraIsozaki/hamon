@@ -21,6 +21,8 @@ repositories {
 }
 
 dependencies {
+	// Spring AI のバージョンを BOM で揃える（MCP サーバー、ADR-0006）
+	implementation platform('org.springframework.ai:spring-ai-bom:2.0.2')
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	// データアクセスは MyBatis（ADR-0001）。Spring Boot 4.1 系に対応した 4.1.x を使う
@@ -32,6 +34,8 @@ dependencies {
 	// 生成コードの @Valid / @Min などを実際に検証させる
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	runtimeOnly 'com.oracle.database.jdbc:ojdbc17'
+	// Claude Code から impact / analysis を MCP ツールとして呼べるようにする（Streamable HTTP、ADR-0006）
+	implementation 'org.springframework.ai:spring-ai-starter-mcp-server-webmvc'
 	// Java ソースの解析（ADR-0002）。symbol-solver は呼び出し先の型解決に使う
 	implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.28.2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'

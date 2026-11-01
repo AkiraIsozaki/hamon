@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "hamon": {
+      "type": "http",
+      "url": "http://localhost:8080/mcp"
+    }
+  }
+}

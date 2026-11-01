@@ -63,8 +63,7 @@ flowchart LR
   FE[フロントエンド<br/>React + Vite] -- OpenAPI の契約 --> API[Spring Boot API]
   API --> DB[(Oracle 26ai Free)]
   API --> JEV[Jev<br/>System One API]
-  API --> CL[Claude API]
-  CC[Claude Code] -. 後で MCP 経由 .-> API
+  CC[Claude Code] -- MCP（/mcp） --> API
 ```
 
 ---
@@ -133,6 +132,7 @@ flowchart LR
 | データアクセス | MyBatis | ADR-0001 で比較し、ADR-0003 で確定。マイグレーションは Flyway |
 | フロント | React + Vite + TypeScript | `frontend/`。グラフ描画は Cytoscape.js。TypeScript は openapi-typescript の都合で 5 系に固定 |
 | 解析 | JavaParser + symbol solver（ADR-0002） | MyBatis XML は DOM で読み、SQL が使う表・列は DB 辞書との識別子照合で決める（ADR-0004） |
+| MCP | Spring AI 2.0.2 `spring-ai-starter-mcp-server-webmvc`（ADR-0006） | Streamable HTTP、`POST /mcp`。接続設定は `.mcp.json` |
 | Jev | REST API 直叩き | `TYPESAFE_API_KEY` はリポジトリ直下の `.env`（git 管理外）からコンテナの環境変数として渡す |
 | 開発環境 | Linux Mint + Docker Engine + VS Code + Dev Container + Claude Code | `.devcontainer/` 参照 |
 
@@ -239,7 +239,8 @@ components:
 - [x] Phase 3：JavaParser で `src/main/java` を解析し、`POST /api/analysis` でグラフを作り直す。書き込みも MyBatis / Spring Data JDBC の両方（2026-10-31、ADR-0002）
 - [x] Phase 4：Oracle の辞書から表・列をノードに、MyBatis XML の SQL 文から表・列へ辺を張る。`NODE.NAME` を変更点にして Controller まで辿れる（2026-11-01、ADR-0004）
 - [x] Phase 5：あいまいな辺（同名メソッド・複数表の列名）を Jev に Noul で判定させ、答えをそのまま確からしさにする。`RestClient` + `@Retryable`。質問は英語（2026-11-01、ADR-0005）
-- [ ] Phase 6：Claude でレポート / MCP 化
+- [x] Phase 6：Spring AI の MCP サーバーで `survey_impact` / `analyze_sources` を公開。`.mcp.json` で Claude Code から接続。レポートは Claude Code 自身が書く（サーバーから Claude API は呼ばない）（2026-11-01、ADR-0006）
+- [ ] 次：実運用で試す（他リポジトリの SI サンプルを解析対象にする、Jev の判定を複数見てみる、フロントの表示を Phase 4〜6 に追従）
 
 ---
 

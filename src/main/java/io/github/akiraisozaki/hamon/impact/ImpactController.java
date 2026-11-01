@@ -14,14 +14,14 @@ import io.github.akiraisozaki.hamon.api.model.ImpactItem;
 @RequestMapping("/api") // openapi.yaml の servers.url。生成コードには付かないのでここで付ける
 class ImpactController implements ImpactApi {
 
-	private final ImpactMapper graph;
+	private final ImpactSurvey survey;
 
-	ImpactController(ImpactMapper graph) {
-		this.graph = graph;
+	ImpactController(ImpactSurvey survey) {
+		this.survey = survey;
 	}
 
 	@Override
 	public ResponseEntity<List<ImpactItem>> surveyImpact(String target, Double minProbability) {
-		return ResponseEntity.ok(graph.traceUpstream(target, minProbability).stream().map(ImpactRow::toItem).toList());
+		return ResponseEntity.ok(survey.surveyImpact(target, minProbability));
 	}
 }

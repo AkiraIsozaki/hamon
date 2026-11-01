@@ -40,6 +40,7 @@ Java + Oracle のシステムを対象にした「確率つき影響調査ツー
 - `curl -X POST localhost:8080/api/analysis` … `hamon.analysis.source-roots`（既定: `src/main/java`）の Java と `mapper-roots`（既定: `src/main/resources`）の MyBatis XML、接続中の DB の表・列を解析してグラフを作り直す。あいまいな辺は Jev に判定させる（実際に API を呼ぶ。判定はログに `Jev jev-x.y.z が … を判定` と出る）
 - `curl 'localhost:8080/api/impact?target=io.github.akiraisozaki.hamon.impact.ImpactRow%23toItem'` … 影響調査の疎通確認。列なら `target=EDGE.PROBABILITY`
 - `curl localhost:8080/actuator/health` … DB を含むヘルス（`components.db.status` が `UP` なら Oracle に繋がっている）
+- MCP：アプリ起動中は `.mcp.json` の設定で Claude Code から `survey_impact` / `analyze_sources` ツールが使える（`POST /mcp`、ADR-0006）。`claude mcp list` で接続確認
 
 フロントエンド（`frontend/`）
 - `npm run dev` … 起動（http://localhost:5173。`/api` は 8080 へプロキシ）

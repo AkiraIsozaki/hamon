@@ -1,6 +1,15 @@
 spring:
   application:
     name: hamon
+  ai:
+    mcp:
+      server:
+        # Claude Code 向けの MCP サーバー（ADR-0006）。@McpTool を付けた Bean のメソッドがツールになる。
+        # 入口は POST /mcp（spring.ai.mcp.server.streamable-http.mcp-endpoint の既定）。認証は無いので localhost 限定
+        protocol: STREAMABLE
+        name: hamon
+        version: 0.1.0
+        instructions: Java + Oracle のシステムの確率つき影響調査。survey_impact で変更点から影響候補を確からしさ順に得る
   # DB 接続情報は環境変数 SPRING_DATASOURCE_URL / USERNAME / PASSWORD（compose.yaml）で渡す。ここには書かない
 
 management:
