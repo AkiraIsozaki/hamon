@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/nodes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 名前の一部でノードを探す（変更点の入力補完用） */
+        get: operations["searchNodes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/analysis": {
         parameters: {
             query?: never;
@@ -48,12 +65,23 @@ export interface components {
             /** @description 辺の数 */
             edgeCount: number;
         };
+        /**
+         * @description ノードの種類（GLOSSARY「ノード」）
+         * @enum {string}
+         */
+        NodeKind: "METHOD" | "CLASS" | "FILE" | "TABLE" | "COLUMN" | "CONFIG";
+        NodeSummary: {
+            /** @example com.example.order.OrderService#cancel */
+            name: string;
+            kind: components["schemas"]["NodeKind"];
+        };
         ImpactItem: {
             /**
              * @description 影響を受ける候補のノード
              * @example com.example.batch.OrderCancelJob#run
              */
             node: string;
+            kind: components["schemas"]["NodeKind"];
             /**
              * Format: double
              * @description 影響を受ける確からしさ（0〜1）。経路上の辺の確率の積
@@ -102,6 +130,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ImpactItem"][];
+                };
+            };
+            /** @description パラメータ不正 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    searchNodes: {
+        parameters: {
+            query: {
+                /**
+                 * @description 名前に含まれる文字列（大文字小文字を区別しない）
+                 * @example cancel
+                 */
+                q: string;
+                /** @description 返す件数の上限 */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 名前の短い順に並べた一致ノード */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NodeSummary"][];
                 };
             };
             /** @description パラメータ不正 */

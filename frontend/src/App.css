@@ -8,5 +8,6 @@
 .items { padding-left: 1.4em; font-size: 0.8rem; font-family: monospace; }
 .items li { margin: 4px 0; word-break: break-all; }
 .probability { display: inline-block; width: 3.2em; color: #5ec8ff; }
+.kind { display: inline-block; margin-right: 0.4em; padding: 0 0.4em; border: 1px solid #5a6b8c; border-radius: 3px; font-size: 0.7rem; color: #aab4cc; }
 .error { color: #ff8080; }
 .analysis { display: flex; gap: 10px; align-items: center; font-size: 0.85rem; margin: 0 0 12px; }

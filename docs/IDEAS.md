@@ -240,7 +240,8 @@ components:
 - [x] Phase 4：Oracle の辞書から表・列をノードに、MyBatis XML の SQL 文から表・列へ辺を張る。`NODE.NAME` を変更点にして Controller まで辿れる（2026-11-01、ADR-0004）
 - [x] Phase 5：あいまいな辺（同名メソッド・複数表の列名）を Jev に Noul で判定させ、答えをそのまま確からしさにする。`RestClient` + `@Retryable`。質問は英語（2026-11-01、ADR-0005）
 - [x] Phase 6：Spring AI の MCP サーバーで `survey_impact` / `analyze_sources` を公開。`.mcp.json` で Claude Code から接続。レポートは Claude Code 自身が書く（サーバーから Claude API は呼ばない）（2026-11-01、ADR-0006）
-- [ ] 次：実運用で試す（他リポジトリの SI サンプルを解析対象にする、Jev の判定を複数見てみる、フロントの表示を Phase 4〜6 に追従）
+- [x] フロントを Phase 4〜6 の断面に合わせる：`ImpactItem.kind` と `GET /api/nodes`（入力補完）を契約に追加、種類ごとの形・短縮名の修正・一覧に種類（2026-11-01）
+- [ ] 次：実運用で試す（他リポジトリの SI サンプルを解析対象にする、Jev の判定を複数見てみる）。経路ごとの辺の確からしさを API に足して線の濃淡で出す
 
 ---
 

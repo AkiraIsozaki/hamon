@@ -13,6 +13,15 @@
     SELECT id, name, kind FROM node
   </select>
 
+  <!-- 短い名前ほど入力に近いはずなので先に出す。LIKE のワイルドカード（% _）はそのまま使えてよい（検索が広がるだけ） -->
+  <select id="searchNodes" resultType="io.github.akiraisozaki.hamon.graph.Node">
+    SELECT id, name, kind
+      FROM node
+     WHERE UPPER(name) LIKE '%' || UPPER(#{q}) || '%'
+     ORDER BY LENGTH(name), name
+     FETCH FIRST #{limit} ROWS ONLY
+  </select>
+
   <insert id="insertEdge">
     INSERT INTO edge (dependent_id, dependency_id, probability)
     VALUES (#{dependentId}, #{dependencyId}, #{probability})

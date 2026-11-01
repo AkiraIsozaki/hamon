@@ -1,7 +1,7 @@
 import cytoscape from 'cytoscape'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import './App.css'
-import { api, type ImpactItem } from './api/client'
+import { api, type ImpactItem, type NodeKind, type NodeSummary } from './api/client'
 import { rippleElements } from './graph/rippleElements'
 
 const graphStyle: cytoscape.StylesheetJson = [
@@ -19,6 +19,12 @@ const graphStyle: cytoscape.StylesheetJson = [
       'background-opacity': (node) => 0.45 + 0.55 * node.data('probability'),
     },
   },
+  // 種類ごとの形。表は樽（DB の筒）、列はタグ、ファイルは四角、設定キーは角丸。メソッドは既定の丸
+  { selector: 'node[kind = "TABLE"]', style: { shape: 'barrel' } },
+  { selector: 'node[kind = "COLUMN"]', style: { shape: 'round-tag' } },
+  { selector: 'node[kind = "FILE"]', style: { shape: 'rectangle' } },
+  { selector: 'node[kind = "CONFIG"]', style: { shape: 'round-rectangle' } },
+  { selector: 'node[kind = "CLASS"]', style: { shape: 'hexagon' } },
   { selector: 'node[?isTarget]', style: { 'background-color': '#ffb64d', shape: 'diamond' } },
   {
     selector: 'edge',
@@ -32,13 +38,34 @@ const graphStyle: cytoscape.StylesheetJson = [
   },
 ]
 
+const kindLabel: Record<NodeKind, string> = {
+  METHOD: 'メソッド',
+  CLASS: 'クラス',
+  FILE: 'ファイル',
+  TABLE: '表',
+  COLUMN: '列',
+  CONFIG: '設定',
+}
+
 export default function App() {
   const [target, setTarget] = useState('io.github.akiraisozaki.hamon.impact.ImpactRow#toItem')
   const [minProbability, setMinProbability] = useState(0.05)
   const [items, setItems] = useState<ImpactItem[]>([])
   const [error, setError] = useState<string>()
   const [analysis, setAnalysis] = useState<string>()
+  const [suggestions, setSuggestions] = useState<NodeSummary[]>([])
   const graphRef = useRef<HTMLDivElement>(null)
+
+  /** 変更点の入力に合わせてノード名の候補を引く。2 文字未満では引かない */
+  async function suggest(q: string) {
+    setTarget(q)
+    if (q.length < 2) {
+      setSuggestions([])
+      return
+    }
+    const { data } = await api.GET('/nodes', { params: { query: { q } } })
+    setSuggestions(data ?? [])
+  }
 
   async function analyze() {
     setAnalysis('解析中…')
@@ -82,8 +109,13 @@ export default function App() {
         </p>
         <form onSubmit={survey}>
           <label>
-            変更点
-            <input value={target} onChange={(e) => setTarget(e.target.value)} />
+            変更点（名前の一部を打つと候補が出る）
+            <input value={target} list="node-suggestions" onChange={(e) => suggest(e.target.value)} />
+            <datalist id="node-suggestions">
+              {suggestions.map((node) => (
+                <option key={node.name} value={node.name}>{kindLabel[node.kind]}</option>
+              ))}
+            </datalist>
           </label>
           <label>
             閾値（この確率以上を表示）: {minProbability.toFixed(2)}
@@ -95,7 +127,8 @@ export default function App() {
         <ol className="items">
           {items.map((item) => (
             <li key={item.node}>
-              <span className="probability">{(item.probability * 100).toFixed(0)}%</span> {item.node}
+              <span className="probability">{(item.probability * 100).toFixed(0)}%</span>
+              <span className="kind">{kindLabel[item.kind]}</span> {item.node}
             </li>
           ))}
         </ol>

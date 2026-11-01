@@ -2,6 +2,7 @@ import createClient from 'openapi-fetch'
 import type { components, paths } from './schema'
 
 export type ImpactItem = components['schemas']['ImpactItem']
+export type NodeKind = components['schemas']['NodeKind']
+export type NodeSummary = components['schemas']['NodeSummary']
 
-/** openapi.yaml から生成した型で守られた API クライアント（schema.d.ts は `npm run api` で再生成） */
 export const api = createClient<paths>({ baseUrl: '/api' })

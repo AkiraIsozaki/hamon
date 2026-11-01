@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import type { ImpactItem } from '../api/client'
-import { rippleElements } from './rippleElements'
+import { rippleElements, shortName } from './rippleElements'
 
 function item(probability: number, ...path: string[]): ImpactItem {
-  return { node: path[path.length - 1], probability, path }
+  return { node: path[path.length - 1], kind: 'METHOD', probability, path }
 }
 
 describe('影響候補からグラフの要素を作る', () => {
@@ -27,10 +27,21 @@ describe('影響候補からグラフの要素を作る', () => {
     expect(rippleElements([])).toEqual([])
   })
 
-  it('表示名はパッケージやディレクトリを省く', () => {
-    const elements = rippleElements([item(0.5, 'com.example.OrderService#cancel', 'web/order/cancel.html')])
+  it('候補のノードには種類が付き、変更点には付かない', () => {
+    const elements = rippleElements([{ node: 'ORDERS.STATUS', kind: 'COLUMN', probability: 0.9, path: ['T', 'ORDERS.STATUS'] }])
 
-    const labels = elements.filter((e) => !('source' in e.data)).map((e) => e.data.label)
-    expect(labels).toEqual(['OrderService#cancel', 'cancel.html'])
+    const kinds = Object.fromEntries(elements.filter((e) => !('source' in e.data)).map((e) => [e.data.id, e.data.kind]))
+    expect(kinds).toEqual({ T: undefined, 'ORDERS.STATUS': 'COLUMN' })
+  })
+})
+
+describe('表示名', () => {
+  it.each([
+    ['メソッドはパッケージを省く', 'com.example.OrderService#cancel', 'OrderService#cancel'],
+    ['ファイルはディレクトリを省く', 'web/order/cancel.html', 'cancel.html'],
+    ['列は表の名前を残す', 'ORDERS.STATUS', 'ORDERS.STATUS'],
+    ['設定キーはそのまま', 'batch.order-cancel.cron', 'batch.order-cancel.cron'],
+  ])('%s', (_, node, expected) => {
+    expect(shortName(node)).toBe(expected)
   })
 })

@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.github.akiraisozaki.hamon.api.model.ImpactItem;
+import io.github.akiraisozaki.hamon.api.model.NodeKind;
 import tools.jackson.databind.json.JsonMapper;
 
 /** sample-graph.sql のグラフを前提にした、API から Oracle まで通す統合テスト。データはテストごとに入れて巻き戻す */
@@ -53,6 +54,14 @@ class ImpactApiTest {
 				"com.example.api.OrderCancelEndpoint#post",
 				"web/order/cancel.html",
 				"com.example.batch.OrderCancelJob#run");
+	}
+
+	@Test
+	void 候補にはノードの種類が付く() {
+		List<ImpactItem> items = surveyItems(ORDER_SERVICE_CANCEL, 0.5);
+
+		ImpactItem page = items.stream().filter(i -> i.getNode().equals("web/order/cancel.html")).findFirst().orElseThrow();
+		assertThat(page.getKind()).isEqualTo(NodeKind.FILE);
 	}
 
 	@Test

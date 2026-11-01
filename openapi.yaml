@@ -40,6 +40,39 @@ paths:
                   $ref: "#/components/schemas/ImpactItem"
         "400":
           description: パラメータ不正
+  /nodes:
+    get:
+      tags: [nodes]
+      operationId: searchNodes
+      summary: 名前の一部でノードを探す（変更点の入力補完用）
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: 名前に含まれる文字列（大文字小文字を区別しない）
+          schema:
+            type: string
+            minLength: 1
+          example: cancel
+        - name: limit
+          in: query
+          description: 返す件数の上限
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: 名前の短い順に並べた一致ノード
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NodeSummary"
+        "400":
+          description: パラメータ不正
   /analysis:
     post:
       tags: [analysis]
@@ -64,14 +97,29 @@ components:
         edgeCount:
           type: integer
           description: 辺の数
+    NodeKind:
+      type: string
+      description: ノードの種類（GLOSSARY「ノード」）
+      enum: [METHOD, CLASS, FILE, TABLE, COLUMN, CONFIG]
+    NodeSummary:
+      type: object
+      required: [name, kind]
+      properties:
+        name:
+          type: string
+          example: com.example.order.OrderService#cancel
+        kind:
+          $ref: "#/components/schemas/NodeKind"
     ImpactItem:
       type: object
-      required: [node, probability, path]
+      required: [node, kind, probability, path]
       properties:
         node:
           type: string
           description: 影響を受ける候補のノード
           example: com.example.batch.OrderCancelJob#run
+        kind:
+          $ref: "#/components/schemas/NodeKind"
         probability:
           type: number
           format: double
