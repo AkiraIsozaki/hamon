@@ -33,14 +33,10 @@ import io.github.akiraisozaki.hamon.graph.NodeKind;
  * - 型解決できた呼び出し先が解析対象の中にあれば確からしさ 1 の辺（確実な辺）
  * - 解析対象の外（JDK・ライブラリ）への呼び出しは辺にしない
  * - 型解決できない呼び出しは、同名のメソッド全部へのあいまいな辺
- * shortcut: あいまいな辺の確からしさは一律 0.5, Phase 5 で Jev に判定させる
  * shortcut: オーバーロードは同じノードにまとまる（名前が クラス#メソッド のため）, 区別が要る時に引数の型を名前に足す
  */
 @Component
 public class JavaSourceAnalysis {
-
-	/** 解析できない呼び出しに与える仮の確からしさ */
-	static final double AMBIGUOUS_PROBABILITY = 0.5;
 
 	public DependencyGraph analyze(List<Path> sourceRoots) {
 		List<CompilationUnit> units = parse(sourceRoots);
@@ -67,14 +63,14 @@ public class JavaSourceAnalysis {
 		if (resolvedDependency.isPresent()) {
 			String dependency = resolvedDependency.get();
 			if (nodes.containsKey(dependency)) {
-				edges.put(dependent + " -> " + dependency, new DependencyEdge(dependent, dependency, 1.0));
+				edges.put(dependent + " -> " + dependency, DependencyEdge.certain(dependent, dependency));
 			}
 			return;
 		}
 		nodes.keySet().stream()
 				.filter(node -> node.endsWith("#" + calledName))
 				.forEach(dependency -> edges.putIfAbsent(dependent + " -> " + dependency,
-						new DependencyEdge(dependent, dependency, AMBIGUOUS_PROBABILITY)));
+						DependencyEdge.ambiguous(dependent, dependency)));
 	}
 
 	private static List<CompilationUnit> parse(List<Path> sourceRoots) {
